@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嵌入式英语学习工具</title>
+<style>
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;color:var(--text);background:var(--bg);transition:background-color .3s,color .3s;min-height:100vh}
+.en-word{font-family:"SF Mono","Cascadia Code",Consolas,monospace;letter-spacing:0.02em}
+
+/* ============================================================
+   CSS Custom Properties
+   ============================================================ */
+:root{
+  --level-0:#e74c3c;--level-1:#e67e22;--level-2:#f1c40f;--level-3:#2ecc71;--level-4:#3498db;
+  --primary:#2563eb;--primary-hover:#1d4ed8;--primary-light:#dbeafe;
+  --success:#16a34a;--success-light:#dcfce7;
+  --danger:#dc2626;--danger-light:#fee2e2;
+  --warning:#f59e0b;--warning-light:#fef3c7;
+  --bg:#ffffff;--bg-secondary:#f8fafc;--bg-tertiary:#f1f5f9;
+  --text:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);--shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+  --radius-sm:6px;--radius:8px;--radius-md:12px;--radius-lg:16px;
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;
+  --nav-height:56px;
+  --transition-fast:.15s ease;--transition:.25s ease;--transition-slow:.4s ease;
+}
+
+/* Dark Theme */
+[data-theme="dark"]{
+  --bg:#0f172a;--bg-secondary:#1e293b;--bg-tertiary:#334155;
+  --text:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;
+  --border:#334155;--border-light:#1e293b;
+  --primary-light:#1e3a5f;
+  --success-light:#14532d;--danger-light:#450a0a;--warning-light:#422006;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);--shadow:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 4px 6px rgba(0,0,0,.5);--shadow-lg:0 10px 15px rgba(0,0,0,.6);
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+.app-container{max-width:800px;margin:0 auto;padding:0 var(--space-md);min-height:100vh;display:flex;flex-direction:column}
+.app-header{padding:var(--space-lg) 0 var(--space-md);text-align:center;border-bottom:1px solid var(--border);margin-bottom:var(--space-md)}
+.app-header h1{font-size:1.5rem;font-weight:700;color:var(--primary)}
+.app-header p{font-size:.85rem;color:var(--text-secondary);margin-top:var(--space-xs)}
+.app-nav{display:flex;gap:2px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:3px;margin-bottom:var(--space-lg);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.app-nav::-webkit-scrollbar{display:none}
+.nav-tab{flex:1 0 auto;padding:10px 14px;text-align:center;font-size:.85rem;font-weight:500;color:var(--text-secondary);background:none;border:none;border-radius:var(--radius);cursor:pointer;transition:all var(--transition-fast);white-space:nowrap;min-width:fit-content}
+.nav-tab:hover{color:var(--text);background:var(--bg-tertiary)}
+.nav-tab.active{color:var(--primary);background:var(--bg);box-shadow:var(--shadow-sm);font-weight:600}
+.app-main{flex:1;padding-bottom:var(--space-2xl)}
+.app-footer{text-align:center;padding:var(--space-md) 0;font-size:.75rem;color:var(--text-muted);border-top:1px solid var(--border)}
+
+/* Settings button */
+.settings-btn{position:absolute;top:var(--space-md);right:var(--space-md);width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text-secondary);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);z-index:10}
+.settings-btn:hover{background:var(--bg-secondary);color:var(--text);border-color:var(--text-secondary)}
+
+/* ============================================================
+   Views
+   ============================================================ */
+.view{display:none;animation:fadeIn .2s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.view-header{margin-bottom:var(--space-lg)}
+.view-header h2{font-size:1.3rem;font-weight:700;margin-bottom:var(--space-xs)}
+.view-header p{font-size:.85rem;color:var(--text-secondary)}
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-lg);box-shadow:var(--shadow-sm);transition:box-shadow var(--transition-fast),transform var(--transition-fast)}
+.card:hover{box-shadow:var(--shadow)}
+.card-header{font-weight:600;margin-bottom:var(--space-sm)}
+.card-body{color:var(--text-secondary);font-size:.9rem}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-sm);padding:10px 20px;font-size:.9rem;font-weight:500;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;transition:all var(--transition-fast);font-family:inherit;min-height:44px;line-height:1;text-decoration:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover:not(:disabled){background:#15803d}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover:not(:disabled){background:#b91c1c}
+.btn-outline{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-outline:hover:not(:disabled){background:var(--bg-tertiary);border-color:var(--text-secondary)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border-color:transparent}
+.btn-ghost:hover:not(:disabled){background:var(--bg-tertiary);color:var(--text)}
+.btn-lg{padding:12px 28px;font-size:1rem;min-height:48px}
+.btn-sm{padding:6px 12px;font-size:.8rem;min-height:32px}
+.btn-block{width:100%}
+.btn-group{display:flex;gap:var(--space-sm);flex-wrap:wrap}
+
+/* ============================================================
+   Badges
+   ============================================================ */
+.badge{display:inline-flex;align-items:center;padding:2px 10px;font-size:.75rem;font-weight:600;border-radius:99px;line-height:1.6}
+.badge-level-0{background:var(--danger-light);color:var(--level-0)}
+.badge-level-1{background:var(--warning-light);color:var(--level-1)}
+.badge-level-2{background:#fef9c3;color:#a16207}
+.badge-level-3{background:var(--success-light);color:var(--level-3)}
+.badge-level-4{background:var(--primary-light);color:var(--level-4)}
+
+/* ============================================================
+   Progress Bar
+   ============================================================ */
+.progress-bar{width:100%;height:8px;background:var(--bg-tertiary);border-radius:99px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:99px;transition:width .5s ease}
+.progress-bar-fill.level-0{background:var(--level-0)}
+.progress-bar-fill.level-1{background:var(--level-1)}
+.progress-bar-fill.level-2{background:var(--level-2)}
+.progress-bar-fill.level-3{background:var(--level-3)}
+.progress-bar-fill.level-4{background:var(--level-4)}
+
+/* ============================================================
+   Forms
+   ============================================================ */
+.input-field{width:100%;padding:10px 14px;font-size:.95rem;font-family:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);transition:border-color var(--transition-fast),box-shadow var(--transition-fast);outline:none}
+.input-field:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.input-field::placeholder{color:var(--text-muted)}
+.input-field.en-word{font-size:1.1rem;letter-spacing:0.05em}
+.input-group{display:flex;flex-direction:column;gap:var(--space-xs)}
+.input-label{font-size:.85rem;font-weight:500;color:var(--text-secondary)}
+
+/* ============================================================
+   Toast Notifications
+   ============================================================ */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:var(--radius-md);font-size:.9rem;font-weight:500;z-index:1000;box-shadow:var(--shadow-lg);transition:transform .3s ease;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--success);color:#fff}
+.toast.error{background:var(--danger);color:#fff}
+
+/* ============================================================
+   Modal
+   ============================================================ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:none;align-items:center;justify-content:center;padding:var(--space-md)}
+.modal-overlay.active{display:flex}
+.modal-content{background:var(--bg);border-radius:var(--radius-lg);padding:var(--space-xl);max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:fadeIn .2s ease;max-height:90vh;overflow-y:auto}
+.modal-content h3{font-size:1.15rem;margin-bottom:var(--space-md)}
+.modal-content p{font-size:.9rem;color:var(--text-secondary);margin-bottom:var(--space-md)}
+.modal-actions{display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-lg)}
+
+/* ============================================================
+   Empty State
+   ============================================================ */
+.empty-state{text-align:center;padding:var(--space-2xl) var(--space-lg);color:var(--text-secondary)}
+.empty-state-icon{font-size:3rem;margin-bottom:var(--space-md);opacity:.4}
+.empty-state h3{font-size:1.1rem;color:var(--text);margin-bottom:var(--space-sm)}
+.empty-state p{font-size:.85rem;max-width:320px;margin:0 auto var(--space-lg)}
+
+/* ============================================================
+   Stats Grid (for dashboard)
+   ============================================================ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-md)}
+.stat-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-lg);text-align:center}
+.stat-value{font-size:2rem;font-weight:700;color:var(--primary);line-height:1.2}
+.stat-label{font-size:.8rem;color:var(--text-secondary);margin-top:var(--space-xs)}
+
+/* ============================================================
+   Flashcard
+   ============================================================ */
+.flashcard-scene{perspective:800px;width:100%;max-width:500px;margin:0 auto}
+.flashcard{position:relative;width:100%;height:280px;cursor:pointer;transform-style:preserve-3d;transition:transform .5s ease}
+.flashcard.flipped{transform:rotateY(180deg)}
+.flashcard-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-xl);box-shadow:var(--shadow-md);border:2px solid var(--border)}
+.flashcard-front{background:var(--bg);z-index:1}
+.flashcard-back{background:var(--bg-secondary);transform:rotateY(180deg)}
+.flashcard-word{font-size:2rem;font-weight:700;margin-bottom:var(--space-sm)}
+.flashcard-hint{font-size:.9rem;color:var(--text-muted);margin-bottom:var(--space-md)}
+.flashcard-label{position:absolute;top:var(--space-md);left:var(--space-md);font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.rating-bar{display:flex;gap:var(--space-sm);justify-content:center;margin-top:var(--space-lg);flex-wrap:wrap}
+.rating-btn{padding:8px 14px;border:2px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:.82rem;transition:all var(--transition-fast);font-family:inherit;min-width:60px}
+.rating-btn:hover{border-color:var(--primary);background:var(--primary-light)}
+.rating-btn.r0:hover{border-color:var(--level-0);background:var(--danger-light)}
+.rating-btn.r1:hover{border-color:var(--level-1);background:var(--warning-light)}
+.rating-btn.r2:hover{border-color:var(--level-2);background:#fef9c3}
+.rating-btn.r3:hover{border-color:var(--level-3);background:var(--success-light)}
+.rating-btn.r4:hover{border-color:var(--level-4);background:var(--primary-light)}
+.flashcard-progress{text-align:center;font-size:.85rem;color:var(--text-secondary);margin-top:var(--space-sm)}
+.flashcard-actions{display:flex;gap:var(--space-sm);justify-content:center;margin-top:var(--space-md)}
+
+/* ============================================================
+   Spelling & Quiz Input
+   ============================================================ */
+.spell-input-container{text-align:center;max-width:500px;margin:0 auto}
+.spell-prompt{font-size:1.3rem;font-weight:600;margin-bottom:var(--space-lg);color:var(--text)}
+.spell-hint{font-size:.9rem;color:var(--text-muted);margin-bottom:var(--space-md)}
+.spell-result{padding:var(--space-md);border-radius:var(--radius);margin-top:var(--space-md);font-weight:500;text-align:center}
+.spell-result.correct{background:var(--success-light);color:var(--success)}
+.spell-result.wrong{background:var(--danger-light);color:var(--danger)}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);max-width:500px;margin:var(--space-lg) auto 0}
+.quiz-option{padding:14px;border:2px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:1rem;transition:all var(--transition-fast);text-align:center}
+.quiz-option:hover{border-color:var(--primary);background:var(--primary-light)}
+.quiz-option.correct-pick{border-color:var(--success);background:var(--success-light);color:var(--success)}
+.quiz-option.wrong-pick{border-color:var(--danger);background:var(--danger-light);color:var(--danger)}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media(max-width:640px){
+  .app-header h1{font-size:1.25rem}
+  .app-nav{gap:1px;padding:2px}
+  .nav-tab{padding:8px 10px;font-size:.78rem}
+  .card{padding:var(--space-md)}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:var(--space-sm)}
+  .stat-value{font-size:1.5rem}
+  .app-container{padding:0 var(--space-sm)}
+  .app-header{padding:var(--space-md) 0 var(--space-sm)}
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header" style="position:relative">
+    <h1>嵌入式英语学习工具</h1>
+    <p>专为嵌入式工程师设计的专业英语词汇学习助手</p>
+    <button class="settings-btn" id="btn-settings" title="设置" aria-label="设置">&#9881;</button>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="app-nav" id="app-nav">
+    <button class="nav-tab active" data-view="home">首页</button>
+    <button class="nav-tab" data-view="flashcard">闪卡</button>
+    <button class="nav-tab" data-view="spelling">拼写</button>
+    <button class="nav-tab" data-view="quiz">测验</button>
+    <button class="nav-tab" data-view="vocabulary">词汇</button>
+    <button class="nav-tab" data-view="stats">统计</button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <!-- Home / Dashboard -->
+    <section class="view active" id="view-home">
+      <div class="view-header">
+        <h2>学习概览</h2>
+        <p>今日学习进度与复习提醒</p>
+      </div>
+      <div class="stats-grid" id="home-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-due">0</div>
+          <div class="stat-label">待复习单词</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-today">0</div>
+          <div class="stat-label">今日已学</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-label">连续学习天数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-mastery">0%</div>
+          <div class="stat-label">总体掌握率</div>
+        </div>
+      </div>
+      <div style="margin-top:var(--space-lg);display:flex;gap:var(--space-sm);flex-wrap:wrap">
+        <button class="btn btn-primary btn-lg" id="btn-start-review">开始复习</button>
+        <button class="btn btn-outline btn-lg" id="btn-new-words">学习新词</button>
+      </div>
+    </section>
+
+    <!-- Flashcard -->
+    <section class="view" id="view-flashcard">
+      <div class="view-header">
+        <h2>闪卡模式</h2>
+        <p>看中文释义，回忆英文单词</p>
+      </div>
+      <div id="flashcard-content">
+        <div class="empty-state">
+          <div class="empty-state-icon">&#128214;</div>
+          <h3>暂无待复习单词</h3>
+          <p>所有单词都已掌握，或者还没有开始学习。去词汇页面添加新词吧！</p>
+          <button class="btn btn-primary" onclick="EST.ui.switchView('vocabulary')">浏览词汇</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spelling -->
+    <section class="view" id="view-spelling">
+      <div class="view-header">
+        <h2>拼写模式</h2>
+        <p>根据中文释义输入英文单词</p>
+      </div>
+      <div id="spelling-content">
+        <div class="empty-state">
+          <div class="empty-state-icon">&#9997;</div>
+          <h3>暂无待拼写单词</h3>
+          <p>先通过闪卡学习一些单词，再来这里练习拼写吧！</p>
+          <button class="btn btn-primary" onclick="EST.ui.switchView('flashcard')">去闪卡学习</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section class="view" id="view-quiz">
+      <div class="view-header">
+        <h2>测验模式</h2>
+        <p>选择题和填空题混合测验</p>
+      </div>
+      <div id="quiz-content">
+        <div class="empty-state">
+          <div class="empty-state-icon">&#128221;</div>
+          <h3>准备开始测验</h3>
+          <p>测验包含选择题和填空题，帮助你检验学习效果。</p>
+          <button class="btn btn-primary" id="btn-start-quiz">开始测验</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vocabulary Browser -->
+    <section class="view" id="view-vocabulary">
+      <div class="view-header">
+        <h2>词汇浏览器</h2>
+        <p>浏览和搜索所有嵌入式英语词汇</p>
+      </div>
+      <div style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-lg);flex-wrap:wrap">
+        <input type="text" class="input-field" id="vocab-search" placeholder="搜索词汇（中英文）..." style="flex:1;min-width:200px">
+        <select class="input-field" id="vocab-filter-category" style="width:auto">
+          <option value="all">全部分类</option>
+        </select>
+        <select class="input-field" id="vocab-filter-level" style="width:auto">
+          <option value="all">全部等级</option>
+          <option value="0">完全不认识</option>
+          <option value="1">有点印象</option>
+          <option value="2">认识但不会用</option>
+          <option value="3">基本掌握</option>
+          <option value="4">完全掌握</option>
+        </select>
+      </div>
+      <div id="vocab-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">&#128218;</div>
+          <h3>词汇库加载中...</h3>
+          <p>请稍候，正在准备嵌入式专业英语词汇数据。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="view" id="view-stats">
+      <div class="view-header">
+        <h2>学习统计</h2>
+        <p>查看你的学习进度和掌握情况</p>
+      </div>
+      <div id="stats-content">
+        <div class="empty-state">
+          <div class="empty-state-icon">&#128200;</div>
+          <h3>暂无学习记录</h3>
+          <p>开始学习后，这里会显示你的学习统计数据和进度图表。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    嵌入式英语学习工具 &mdash; 离线可用 &middot; 数据存储在本地浏览器
+  </footer>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-content" id="modal-content"></div>
+</div>
+
+<!-- Settings Panel (hidden, toggled via settings button) -->
+<div class="modal-overlay" id="settings-overlay">
+  <div class="modal-content" id="settings-content">
+    <h3>设置</h3>
+    <div style="display:flex;flex-direction:column;gap:var(--space-lg)">
+      <div class="input-group">
+        <label class="input-label">每日学习目标（单词数）</label>
+        <select class="input-field" id="setting-daily-goal">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">复习方向</label>
+        <select class="input-field" id="setting-review-direction">
+          <option value="cn-to-en" selected>看中文，回忆英文</option>
+          <option value="en-to-cn">看英文，回忆中文</option>
+          <option value="mixed">混合模式</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">主题</label>
+        <select class="input-field" id="setting-theme">
+          <option value="light" selected>浅色</option>
+          <option value="dark">深色</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">字号</label>
+        <select class="input-field" id="setting-font-size">
+          <option value="small">小</option>
+          <option value="medium" selected>中</option>
+          <option value="large">大</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">测验题目数量</label>
+        <select class="input-field" id="setting-quiz-count">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">自动发音</label>
+        <select class="input-field" id="setting-auto-audio">
+          <option value="false" selected>关闭</option>
+          <option value="true">开启</option>
+        </select>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap">
+        <button class="btn btn-outline" id="btn-export-data">导出数据</button>
+        <button class="btn btn-outline" id="btn-import-data">导入数据</button>
+        <button class="btn btn-danger" id="btn-reset-data">重置所有数据</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="btn-settings-close">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   EST Namespace
+   ============================================================ */
+const EST = window.EST = {
+  VERSION: 1,
+  data: {},
+  srs: {},
+  ui: {},
+  modes: {},
+  stats: {},
+  utils: {}
+};
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+EST.utils.getNow = () => Date.now();
+
+EST.utils.formatDate = (ts) => {
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
+
+EST.utils.todayStr = () => EST.utils.formatDate(EST.utils.getNow());
+
+EST.utils.debounce = (fn, delay) => {
+  let timer;
+  return function(...args){
+    clearTimeout(timer);
+    timer = setTimeout(()=>fn.apply(this,args),delay);
+  };
+};
+
+EST.utils.shuffle = (arr) => {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+};
+
+EST.utils.randInt = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+
+EST.utils.escapeHtml = (str) => {
+  const d=document.createElement('div');
+  d.textContent=str;
+  return d.innerHTML;
+};
+
+/* ============================================================
+   DATA LAYER
+   ============================================================ */
+EST.data._get = (key) => {
+  try{const v=localStorage.getItem(key);return v?JSON.parse(v):null}
+  catch(e){console.warn('localStorage read error:',e);return null}
+};
+
+EST.data._set = (key,val) => {
+  try{localStorage.setItem(key,JSON.stringify(val))}
+  catch(e){console.warn('localStorage write error:',e);EST.ui.toast('存储空间不足，请导出数据后清理','error')}
+};
+
+EST.data.loadVocab = () => EST.data._get('est_vocabulary') || [];
+EST.data.saveVocab = (v) => EST.data._set('est_vocabulary',v);
+
+EST.data.loadState = () => EST.data._get('est_state') || {};
+EST.data.saveState = (s) => EST.data._set('est_state',s);
+
+EST.data.loadSettings = () => EST.data._get('est_settings') || {
+  dailyGoal:20,reviewDirection:'cn-to-en',theme:'light',fontSize:'medium',
+  quizQuestionCount:10,autoPlayAudio:false,firstRunComplete:false
+};
+EST.data.saveSettings = (s) => EST.data._set('est_settings',s);
+
+EST.data.loadDaily = () => EST.data._get('est_daily') || {};
+EST.data.saveDaily = (d) => EST.data._set('est_daily',d);
+
+EST.data.getVersion = () => {
+  const v = localStorage.getItem('est_version');
+  return v ? parseInt(v,10) : 0;
+};
+
+/* ============================================================
+   VOCABULARY DATA (built-in, ~225 words)
+   ============================================================ */
+EST.data.BUILTIN_VOCAB = [
+  // ── 编程基础概念 (programming-basics) ──
+  {id:"pb001",en:"variable",cn:"变量",cat:"programming-basics",def:"程序中用于存储数据的命名存储位置",ex:"int counter = 0;",diff:1},
+  {id:"pb002",en:"constant",cn:"常量",cat:"programming-basics",def:"值在程序执行期间不可改变的量",ex:"const int MAX = 100;",diff:1},
+  {id:"pb003",en:"function",cn:"函数",cat:"programming-basics",def:"执行特定任务的可重用代码块",ex:"void setup() { }",diff:1},
+  {id:"pb004",en:"parameter",cn:"参数",cat:"programming-basics",def:"传递给函数的值",ex:"void delay(int ms)",diff:1},
+  {id:"pb005",en:"return",cn:"返回",cat:"programming-basics",def:"函数执行完毕后回传值给调用者",ex:"return 0;",diff:1},
+  {id:"pb006",en:"loop",cn:"循环",cat:"programming-basics",def:"重复执行一段代码直到条件不满足",ex:"while(1){ }",diff:1},
+  {id:"pb007",en:"condition",cn:"条件",cat:"programming-basics",def:"决定程序分支执行的判断表达式",ex:"if(x > 0)",diff:1},
+  {id:"pb008",en:"statement",cn:"语句",cat:"programming-basics",def:"程序中的一条完整指令",ex:"x = x + 1;",diff:1},
+  {id:"pb009",en:"expression",cn:"表达式",cat:"programming-basics",def:"可求值产生结果的一段代码",ex:"a + b * c",diff:2},
+  {id:"pb010",en:"operator",cn:"运算符",cat:"programming-basics",def:"执行数学或逻辑操作的符号",ex:"+ - * / & |",diff:1},
+  {id:"pb011",en:"assignment",cn:"赋值",cat:"programming-basics",def:"将值存储到变量中的操作",ex:"x = 10;",diff:1},
+  {id:"pb012",en:"declaration",cn:"声明",cat:"programming-basics",def:"告诉编译器变量或函数的名称和类型",ex:"extern int count;",diff:2},
+  {id:"pb013",en:"definition",cn:"定义",cat:"programming-basics",def:"为变量分配内存或为函数提供实现",ex:"int count = 0;",diff:2},
+  {id:"pb014",en:"initialization",cn:"初始化",cat:"programming-basics",def:"在声明变量时赋予初始值",ex:"int x = 0;",diff:2},
+  {id:"pb015",en:"scope",cn:"作用域",cat:"programming-basics",def:"变量在程序中可被访问的范围",ex:"{ int local; }",diff:2},
+  {id:"pb016",en:"comment",cn:"注释",cat:"programming-basics",def:"代码中不被编译器执行的说明文字",ex:"// this is a comment",diff:1},
+  {id:"pb017",en:"keyword",cn:"关键字",cat:"programming-basics",def:"编程语言中具有特殊含义的保留字",ex:"int, if, for, while",diff:1},
+  {id:"pb018",en:"syntax",cn:"语法",cat:"programming-basics",def:"编程语言的书写规则和结构",ex:"",diff:1},
+  {id:"pb019",en:"algorithm",cn:"算法",cat:"programming-basics",def:"解决特定问题的步骤序列",ex:"",diff:2},
+  {id:"pb020",en:"logic",cn:"逻辑",cat:"programming-basics",def:"程序中条件判断和控制的推理过程",ex:"if(a && b)",diff:2},
+  {id:"pb021",en:"input",cn:"输入",cat:"programming-basics",def:"程序从外部接收数据",ex:"scanf()",diff:1},
+  {id:"pb022",en:"output",cn:"输出",cat:"programming-basics",def:"程序向外部发送数据",ex:"printf()",diff:1},
+  {id:"pb023",en:"error",cn:"错误",cat:"programming-basics",def:"程序执行中出现的异常情况",ex:"",diff:1},
+  {id:"pb024",en:"exception",cn:"异常",cat:"programming-basics",def:"程序运行时的非正常事件",ex:"",diff:2},
+  {id:"pb025",en:"library",cn:"库",cat:"programming-basics",def:"预先编写好的可重用代码集合",ex:"#include <stdio.h>",diff:2},
+
+  // ── 数据类型与变量 (data-types) ──
+  {id:"dt001",en:"integer",cn:"整数",cat:"data-types",def:"不带小数部分的数值类型",ex:"int count = 5;",diff:1},
+  {id:"dt002",en:"float",cn:"浮点数",cat:"data-types",def:"带小数部分的数值类型",ex:"float voltage = 3.3;",diff:1},
+  {id:"dt003",en:"double",cn:"双精度浮点数",cat:"data-types",def:"比float精度更高的浮点数类型",ex:"double pi = 3.1415926535;",diff:2},
+  {id:"dt004",en:"char",cn:"字符",cat:"data-types",def:"存储单个字符的数据类型",ex:"char c = 'A';",diff:1},
+  {id:"dt005",en:"string",cn:"字符串",cat:"data-types",def:"由多个字符组成的文本序列",ex:"char msg[] = \"hello\";",diff:1},
+  {id:"dt006",en:"boolean",cn:"布尔值",cat:"data-types",def:"只有真(true)或假(false)两种值",ex:"bool flag = true;",diff:1},
+  {id:"dt007",en:"array",cn:"数组",cat:"data-types",def:"相同类型元素的连续存储集合",ex:"int data[10];",diff:1},
+  {id:"dt008",en:"pointer",cn:"指针",cat:"data-types",def:"存储内存地址的变量",ex:"int *p = &x;",diff:2},
+  {id:"dt009",en:"address",cn:"地址",cat:"data-types",def:"变量在内存中的位置编号",ex:"&variable",diff:2},
+  {id:"dt010",en:"unsigned",cn:"无符号",cat:"data-types",def:"只能表示非负数的整数类型",ex:"unsigned int count;",diff:1},
+  {id:"dt011",en:"signed",cn:"有符号",cat:"data-types",def:"可表示正负数的整数类型",ex:"signed int val;",diff:1},
+  {id:"dt012",en:"struct",cn:"结构体",cat:"data-types",def:"将不同类型数据组合成一个整体",ex:"struct Point { int x; int y; };",diff:2},
+  {id:"dt013",en:"union",cn:"联合体",cat:"data-types",def:"所有成员共享同一块内存空间",ex:"union Data { int i; float f; };",diff:3},
+  {id:"dt014",en:"enum",cn:"枚举",cat:"data-types",def:"一组命名的整数常量集合",ex:"enum Color { RED, GREEN, BLUE };",diff:2},
+  {id:"dt015",en:"typedef",cn:"类型定义",cat:"data-types",def:"为已有数据类型创建别名",ex:"typedef unsigned char uint8_t;",diff:2},
+  {id:"dt016",en:"void",cn:"空类型",cat:"data-types",def:"表示没有类型或没有返回值",ex:"void function()",diff:1},
+  {id:"dt017",en:"size",cn:"大小",cat:"data-types",def:"数据类型或变量占用的内存字节数",ex:"sizeof(int)",diff:1},
+  {id:"dt018",en:"byte",cn:"字节",cat:"data-types",def:"8位二进制数据，基本存储单位",ex:"uint8_t byte;",diff:1},
+  {id:"dt019",en:"bit",cn:"位",cat:"data-types",def:"二进制的最小单位，0或1",ex:"",diff:1},
+  {id:"dt020",en:"volatile",cn:"易变的",cat:"data-types",def:"告诉编译器变量的值可能在任何时刻改变",ex:"volatile int flag;",diff:2},
+  {id:"dt021",en:"static",cn:"静态的",cat:"data-types",def:"变量在整个程序运行期间保持其值",ex:"static int counter = 0;",diff:2},
+  {id:"dt022",en:"extern",cn:"外部的",cat:"data-types",def:"声明变量或函数在另一个文件中定义",ex:"extern int global_var;",diff:2},
+  {id:"dt023",en:"register",cn:"寄存器变量",cat:"data-types",def:"建议编译器将变量存储在CPU寄存器中",ex:"register int i;",diff:3},
+  {id:"dt024",en:"cast",cn:"类型转换",cat:"data-types",def:"将一种数据类型转换为另一种",ex:"(int)3.14",diff:2},
+  {id:"dt025",en:"literal",cn:"字面量",cat:"data-types",def:"直接在代码中书写的固定值",ex:"42, 3.14, 'A', \"hello\"",diff:2},
+
+  // ── 控制流程 (control-flow) ──
+  {id:"cf001",en:"if",cn:"如果",cat:"control-flow",def:"根据条件决定是否执行代码块",ex:"if(x > 0) { }",diff:1},
+  {id:"cf002",en:"else",cn:"否则",cat:"control-flow",def:"条件不满足时执行的替代分支",ex:"else { }",diff:1},
+  {id:"cf003",en:"switch",cn:"开关/多路选择",cat:"control-flow",def:"根据表达式的值选择多个执行路径",ex:"switch(x) { case 1: break; }",diff:2},
+  {id:"cf004",en:"case",cn:"分支",cat:"control-flow",def:"switch语句中的匹配条件",ex:"case 1:",diff:1},
+  {id:"cf005",en:"default",cn:"默认",cat:"control-flow",def:"switch中无匹配case时执行的默认分支",ex:"default:",diff:1},
+  {id:"cf006",en:"break",cn:"跳出",cat:"control-flow",def:"立即终止当前循环或switch语句",ex:"break;",diff:1},
+  {id:"cf007",en:"continue",cn:"继续",cat:"control-flow",def:"跳过当前循环剩余部分，进入下一次迭代",ex:"continue;",diff:1},
+  {id:"cf008",en:"for",cn:"for循环",cat:"control-flow",def:"已知循环次数的迭代控制结构",ex:"for(int i=0;i<10;i++)",diff:1},
+  {id:"cf009",en:"while",cn:"while循环",cat:"control-flow",def:"条件为真时重复执行的循环结构",ex:"while(1)",diff:1},
+  {id:"cf010",en:"goto",cn:"跳转",cat:"control-flow",def:"无条件跳转到程序中的指定标签",ex:"goto error;",diff:2},
+  {id:"cf011",en:"label",cn:"标签",cat:"control-flow",def:"程序中goto语句的目标标记",ex:"error:",diff:1},
+  {id:"cf012",en:"increment",cn:"递增",cat:"control-flow",def:"变量的值增加",ex:"i++",diff:1},
+  {id:"cf013",en:"decrement",cn:"递减",cat:"control-flow",def:"变量的值减少",ex:"i--",diff:1},
+  {id:"cf014",en:"iteration",cn:"迭代",cat:"control-flow",def:"循环中的一次重复执行",ex:"",diff:2},
+  {id:"cf015",en:"nested",cn:"嵌套的",cat:"control-flow",def:"一个结构包含在另一个同类结构内",ex:"for(){ for(){ } }",diff:2},
+  {id:"cf016",en:"recursion",cn:"递归",cat:"control-flow",def:"函数直接或间接调用自身",ex:"void f(){ f(); }",diff:3},
+  {id:"cf017",en:"sequence",cn:"顺序",cat:"control-flow",def:"代码按书写顺序依次执行",ex:"",diff:1},
+  {id:"cf018",en:"branch",cn:"分支",cat:"control-flow",def:"程序根据条件选择不同的执行路径",ex:"",diff:2},
+  {id:"cf019",en:"infinite",cn:"无限的",cat:"control-flow",def:"永不终止的循环",ex:"while(1)",diff:1},
+  {id:"cf020",en:"terminate",cn:"终止",cat:"control-flow",def:"程序或循环的结束",ex:"",diff:1},
+
+  // ── 函数与模块化 (functions-modules) ──
+  {id:"fm001",en:"argument",cn:"实参",cat:"functions-modules",def:"调用函数时实际传递的值",ex:"delay(1000)",diff:1},
+  {id:"fm002",en:"prototype",cn:"函数原型",cat:"functions-modules",def:"函数声明，告诉编译器函数的接口",ex:"void delay(int ms);",diff:2},
+  {id:"fm003",en:"callback",cn:"回调函数",cat:"functions-modules",def:"作为参数传递给其他函数的函数指针",ex:"",diff:3},
+  {id:"fm004",en:"header",cn:"头文件",cat:"functions-modules",def:"包含函数声明和宏定义的文件",ex:"#include \"myheader.h\"",diff:1},
+  {id:"fm005",en:"source",cn:"源文件",cat:"functions-modules",def:"包含函数实现的代码文件",ex:"main.c",diff:1},
+  {id:"fm006",en:"module",cn:"模块",cat:"functions-modules",def:"程序中具有独立功能的代码单元",ex:"",diff:2},
+  {id:"fm007",en:"interface",cn:"接口",cat:"functions-modules",def:"模块对外暴露的函数和数据",ex:"",diff:2},
+  {id:"fm008",en:"implementation",cn:"实现",cat:"functions-modules",def:"接口对应的具体代码",ex:"",diff:2},
+  {id:"fm009",en:"inline",cn:"内联",cat:"functions-modules",def:"将函数代码直接嵌入调用处而非跳转",ex:"inline int max(int a,int b)",diff:3},
+  {id:"fm010",en:"macro",cn:"宏",cat:"functions-modules",def:"预处理器定义的文本替换规则",ex:"#define MAX(a,b) ((a)>(b)?(a):(b))",diff:2},
+  {id:"fm011",en:"include",cn:"包含",cat:"functions-modules",def:"将指定文件的内容插入到当前位置",ex:"#include <stdio.h>",diff:1},
+  {id:"fm012",en:"namespace",cn:"命名空间",cat:"functions-modules",def:"用于组织代码和避免名称冲突的机制",ex:"",diff:2},
+  {id:"fm013",en:"signature",cn:"函数签名",cat:"functions-modules",def:"函数名称和参数类型的组合标识",ex:"",diff:2},
+  {id:"fm014",en:"overload",cn:"重载",cat:"functions-modules",def:"同名函数但参数不同",ex:"",diff:2},
+  {id:"fm015",en:"recursive",cn:"递归的",cat:"functions-modules",def:"函数调用自身",ex:"int fact(int n)",diff:2},
+  {id:"fm016",en:"entry",cn:"入口",cat:"functions-modules",def:"程序开始执行的位置",ex:"int main()",diff:1},
+  {id:"fm017",en:"stack",cn:"栈",cat:"functions-modules",def:"函数调用时用于存储局部变量的内存区域",ex:"",diff:2},
+  {id:"fm018",en:"frame",cn:"栈帧",cat:"functions-modules",def:"每次函数调用在栈上分配的内存块",ex:"",diff:3},
+  {id:"fm019",en:"invoke",cn:"调用",cat:"functions-modules",def:"执行一个函数",ex:"",diff:1},
+  {id:"fm020",en:"callback",cn:"回调",cat:"functions-modules",def:"事件发生时被调用的函数",ex:"",diff:3},
+
+  // ── 内存管理 (memory-management) ──
+  {id:"mm001",en:"memory",cn:"内存",cat:"memory-management",def:"计算机中用于存储程序和数据的硬件",ex:"",diff:1},
+  {id:"mm002",en:"RAM",cn:"随机存取存储器",cat:"memory-management",def:"可读写的易失性存储器",ex:"",diff:1},
+  {id:"mm003",en:"ROM",cn:"只读存储器",cat:"memory-management",def:"只能读取不能写入的非易失性存储器",ex:"",diff:1},
+  {id:"mm004",en:"flash",cn:"闪存",cat:"memory-management",def:"可电擦除的非易失性存储器",ex:"",diff:1},
+  {id:"mm005",en:"EEPROM",cn:"电可擦除可编程只读存储器",cat:"memory-management",def:"可按字节擦除的非易失性存储器",ex:"",diff:2},
+  {id:"mm006",en:"heap",cn:"堆",cat:"memory-management",def:"动态分配内存的区域",ex:"malloc()",diff:2},
+  {id:"mm007",en:"stack",cn:"栈",cat:"memory-management",def:"自动管理的内存区域，用于局部变量",ex:"",diff:2},
+  {id:"mm008",en:"allocate",cn:"分配",cat:"memory-management",def:"为程序保留一块内存空间",ex:"malloc(100)",diff:2},
+  {id:"mm009",en:"free",cn:"释放",cat:"memory-management",def:"归还之前分配的内存",ex:"free(ptr);",diff:2},
+  {id:"mm010",en:"malloc",cn:"动态内存分配",cat:"memory-management",def:"C标准库中分配堆内存的函数",ex:"void *p = malloc(100);",diff:2},
+  {id:"mm011",en:"buffer",cn:"缓冲区",cat:"memory-management",def:"临时存储数据的内存区域",ex:"char buf[256];",diff:1},
+  {id:"mm012",en:"overflow",cn:"溢出",cat:"memory-management",def:"写入数据超出了分配的内存范围",ex:"",diff:2},
+  {id:"mm013",en:"leak",cn:"泄露",cat:"memory-management",def:"分配的内存未被释放且无法再访问",ex:"",diff:2},
+  {id:"mm014",en:"fragment",cn:"碎片",cat:"memory-management",def:"内存中不连续的小块空闲区域",ex:"",diff:3},
+  {id:"mm015",en:"alignment",cn:"对齐",cat:"memory-management",def:"数据在内存中的起始地址满足特定的倍数",ex:"",diff:3},
+  {id:"mm016",en:"cache",cn:"缓存",cat:"memory-management",def:"高速小容量存储器，加速数据访问",ex:"",diff:2},
+  {id:"mm017",en:"endian",cn:"字节序",cat:"memory-management",def:"多字节数据的存储顺序（大端/小端）",ex:"",diff:3},
+  {id:"mm018",en:"segment",cn:"段",cat:"memory-management",def:"内存中具有特定用途的逻辑区域",ex:".text .data .bss",diff:3},
+  {id:"mm019",en:"null",cn:"空指针",cat:"memory-management",def:"不指向任何有效内存地址的指针",ex:"NULL",diff:1},
+  {id:"mm020",en:"dereference",cn:"解引用",cat:"memory-management",def:"通过指针访问其所指向的值",ex:"*ptr",diff:2},
+  {id:"mm021",en:"offset",cn:"偏移量",cat:"memory-management",def:"相对于基地址的距离",ex:"",diff:2},
+  {id:"mm022",en:"page",cn:"页",cat:"memory-management",def:"内存管理的基本单位",ex:"",diff:3},
+  {id:"mm023",en:"virtual",cn:"虚拟内存",cat:"memory-management",def:"操作系统提供的抽象内存空间",ex:"",diff:3},
+  {id:"mm024",en:"physical",cn:"物理内存",cat:"memory-management",def:"实际硬件上的内存芯片",ex:"",diff:2},
+  {id:"mm025",en:"guard",cn:"保护",cat:"memory-management",def:"防止非法内存访问的机制",ex:"",diff:2},
+
+  // ── 嵌入式硬件 (embedded-hardware) ──
+  {id:"eh001",en:"microcontroller",cn:"微控制器",cat:"embedded-hardware",def:"集成CPU、内存和外设的单芯片计算机",ex:"STM32, ATmega328",diff:1},
+  {id:"eh002",en:"GPIO",cn:"通用输入输出",cat:"embedded-hardware",def:"可配置为输入或输出的通用引脚",ex:"pinMode(13,OUTPUT)",diff:1},
+  {id:"eh003",en:"ADC",cn:"模数转换器",cat:"embedded-hardware",def:"将模拟电压转换为数字值",ex:"analogRead(A0)",diff:1},
+  {id:"eh004",en:"DAC",cn:"数模转换器",cat:"embedded-hardware",def:"将数字值转换为模拟电压",ex:"",diff:2},
+  {id:"eh005",en:"PWM",cn:"脉宽调制",cat:"embedded-hardware",def:"通过改变脉冲宽度来控制平均功率",ex:"analogWrite(9,128)",diff:2},
+  {id:"eh006",en:"register",cn:"寄存器",cat:"embedded-hardware",def:"CPU内部的高速存储单元",ex:"PORTB = 0xFF;",diff:1},
+  {id:"eh007",en:"interrupt",cn:"中断",cat:"embedded-hardware",def:"暂停当前程序执行，处理紧急事件",ex:"attachInterrupt()",diff:2},
+  {id:"eh008",en:"ISR",cn:"中断服务程序",cat:"embedded-hardware",def:"响应中断请求时执行的函数",ex:"ISR(TIMER1_COMPA_vect)",diff:2},
+  {id:"eh009",en:"timer",cn:"定时器",cat:"embedded-hardware",def:"用于计时和生成精确时间间隔的硬件",ex:"",diff:1},
+  {id:"eh010",en:"counter",cn:"计数器",cat:"embedded-hardware",def:"对事件或脉冲进行计数的硬件",ex:"",diff:1},
+  {id:"eh011",en:"clock",cn:"时钟",cat:"embedded-hardware",def:"为CPU和外设提供时序基准的信号",ex:"16MHz crystal",diff:2},
+  {id:"eh012",en:"oscillator",cn:"振荡器",cat:"embedded-hardware",def:"产生周期性信号的电路",ex:"crystal oscillator",diff:2},
+  {id:"eh013",en:"reset",cn:"复位",cat:"embedded-hardware",def:"将系统恢复到初始状态",ex:"",diff:1},
+  {id:"eh014",en:"watchdog",cn:"看门狗",cat:"embedded-hardware",def:"检测系统是否卡死并自动复位的定时器",ex:"",diff:2},
+  {id:"eh015",en:"pin",cn:"引脚",cat:"embedded-hardware",def:"芯片上与外部电路连接的金属触点",ex:"",diff:1},
+  {id:"eh016",en:"bus",cn:"总线",cat:"embedded-hardware",def:"连接多个硬件模块的通信线路集合",ex:"I2C bus, SPI bus",diff:1},
+  {id:"eh017",en:"DMA",cn:"直接存储器访问",cat:"embedded-hardware",def:"不经过CPU直接在内存和外设间传输数据",ex:"",diff:3},
+  {id:"eh018",en:"peripheral",cn:"外设",cat:"embedded-hardware",def:"除CPU外的芯片内部功能模块",ex:"UART, SPI, I2C",diff:2},
+  {id:"eh019",en:"pull-up",cn:"上拉",cat:"embedded-hardware",def:"通过电阻将引脚连接到高电平",ex:"pinMode(pin,INPUT_PULLUP)",diff:2},
+  {id:"eh020",en:"pull-down",cn:"下拉",cat:"embedded-hardware",def:"通过电阻将引脚连接到低电平",ex:"",diff:2},
+  {id:"eh021",en:"debounce",cn:"消抖",cat:"embedded-hardware",def:"消除机械开关通断时的信号抖动",ex:"",diff:3},
+  {id:"eh022",en:"sensor",cn:"传感器",cat:"embedded-hardware",def:"检测物理量并转换为电信号的器件",ex:"temperature sensor",diff:1},
+  {id:"eh023",en:"actuator",cn:"执行器",cat:"embedded-hardware",def:"将电信号转换为物理动作的器件",ex:"motor, servo",diff:2},
+  {id:"eh024",en:"voltage",cn:"电压",cat:"embedded-hardware",def:"两点之间的电位差",ex:"3.3V, 5V",diff:1},
+  {id:"eh025",en:"current",cn:"电流",cat:"embedded-hardware",def:"电荷的定向流动",ex:"20mA",diff:1},
+  {id:"eh026",en:"ground",cn:"地",cat:"embedded-hardware",def:"电路中的参考电位零点",ex:"GND",diff:1},
+  {id:"eh027",en:"VCC",cn:"电源正极",cat:"embedded-hardware",def:"供电电压的正极端",ex:"VCC = 5V",diff:1},
+  {id:"eh028",en:"datasheet",cn:"数据手册",cat:"embedded-hardware",def:"芯片厂商提供的详细技术规格文档",ex:"",diff:2},
+  {id:"eh029",en:"bootloader",cn:"引导加载程序",cat:"embedded-hardware",def:"芯片上电后首先运行的初始化代码",ex:"",diff:2},
+  {id:"eh030",en:"firmware",cn:"固件",cat:"embedded-hardware",def:"存储在非易失性存储器中的嵌入式软件",ex:"",diff:1},
+
+  // ── 通信协议 (communication-protocols) ──
+  {id:"cp001",en:"UART",cn:"通用异步收发传输器",cat:"communication-protocols",def:"异步串行通信接口",ex:"Serial.begin(9600)",diff:1},
+  {id:"cp002",en:"SPI",cn:"串行外设接口",cat:"communication-protocols",def:"高速全双工同步串行通信协议",ex:"SPI.begin()",diff:2},
+  {id:"cp003",en:"I2C",cn:"集成电路总线",cat:"communication-protocols",def:"两线制同步串行通信协议",ex:"Wire.begin()",diff:2},
+  {id:"cp004",en:"CAN",cn:"控制器局域网",cat:"communication-protocols",def:"汽车和工业控制中常用的总线协议",ex:"",diff:3},
+  {id:"cp005",en:"baud",cn:"波特率",cat:"communication-protocols",def:"每秒传输的符号数",ex:"9600, 115200",diff:2},
+  {id:"cp006",en:"parity",cn:"奇偶校验",cat:"communication-protocols",def:"用于检测数据传输错误的校验位",ex:"even parity, odd parity",diff:2},
+  {id:"cp007",en:"protocol",cn:"协议",cat:"communication-protocols",def:"通信双方约定的数据交换规则",ex:"",diff:1},
+  {id:"cp008",en:"serial",cn:"串行",cat:"communication-protocols",def:"一位一位依次传输数据的方式",ex:"",diff:1},
+  {id:"cp009",en:"parallel",cn:"并行",cat:"communication-protocols",def:"同时传输多位数据的方式",ex:"",diff:1},
+  {id:"cp010",en:"duplex",cn:"双工",cat:"communication-protocols",def:"通信双方可同时发送和接收数据",ex:"full-duplex",diff:2},
+  {id:"cp011",en:"half-duplex",cn:"半双工",cat:"communication-protocols",def:"同一时刻只能一方发送数据",ex:"",diff:2},
+  {id:"cp012",en:"master",cn:"主机",cat:"communication-protocols",def:"控制通信总线的设备",ex:"",diff:1},
+  {id:"cp013",en:"slave",cn:"从机",cat:"communication-protocols",def:"响应主机命令的设备",ex:"",diff:1},
+  {id:"cp014",en:"MOSI",cn:"主机输出从机输入",cat:"communication-protocols",def:"SPI协议中主机发送数据给从机的线",ex:"",diff:2},
+  {id:"cp015",en:"MISO",cn:"主机输入从机输出",cat:"communication-protocols",def:"SPI协议中从机发送数据给主机的线",ex:"",diff:2},
+  {id:"cp016",en:"SCL",cn:"串行时钟线",cat:"communication-protocols",def:"I2C协议中的时钟信号线",ex:"",diff:2},
+  {id:"cp017",en:"SDA",cn:"串行数据线",cat:"communication-protocols",def:"I2C协议中的数据信号线",ex:"",diff:2},
+  {id:"cp018",en:"chip select",cn:"片选",cat:"communication-protocols",def:"SPI协议中选择目标从设备",ex:"",diff:2},
+  {id:"cp019",en:"acknowledge",cn:"确认",cat:"communication-protocols",def:"表示数据已收到的应答信号",ex:"ACK",diff:2},
+  {id:"cp020",en:"checksum",cn:"校验和",cat:"communication-protocols",def:"用于验证数据完整性的计算值",ex:"",diff:2},
+  {id:"cp021",en:"CRC",cn:"循环冗余校验",cat:"communication-protocols",def:"一种高效的错误检测算法",ex:"",diff:3},
+  {id:"cp022",en:"packet",cn:"数据包",cat:"communication-protocols",def:"通信中传输的一个完整数据单元",ex:"",diff:2},
+  {id:"cp023",en:"frame",cn:"帧",cat:"communication-protocols",def:"数据链路层的传输单元",ex:"",diff:2},
+  {id:"cp024",en:"start bit",cn:"起始位",cat:"communication-protocols",def:"UART通信中标识数据开始的位",ex:"",diff:1},
+  {id:"cp025",en:"stop bit",cn:"停止位",cat:"communication-protocols",def:"UART通信中标识数据结束的位",ex:"",diff:1},
+
+  // ── 实时操作系统 (rtos) ──
+  {id:"rt001",en:"task",cn:"任务",cat:"rtos",def:"RTOS中独立执行的线程",ex:"xTaskCreate()",diff:2},
+  {id:"rt002",en:"scheduler",cn:"调度器",cat:"rtos",def:"决定哪个任务获得CPU时间的组件",ex:"",diff:2},
+  {id:"rt003",en:"semaphore",cn:"信号量",cat:"rtos",def:"用于任务间同步和资源访问控制的计数器",ex:"xSemaphoreTake()",diff:3},
+  {id:"rt004",en:"mutex",cn:"互斥锁",cat:"rtos",def:"确保同一时刻只有一个任务访问共享资源",ex:"xSemaphoreCreateMutex()",diff:3},
+  {id:"rt005",en:"priority",cn:"优先级",cat:"rtos",def:"任务在调度中的相对重要程度",ex:"",diff:2},
+  {id:"rt006",en:"preemption",cn:"抢占",cat:"rtos",def:"高优先级任务打断低优先级任务的执行",ex:"",diff:3},
+  {id:"rt007",en:"context",cn:"上下文",cat:"rtos",def:"任务切换时需要保存和恢复的CPU状态",ex:"context switch",diff:3},
+  {id:"rt008",en:"queue",cn:"队列",cat:"rtos",def:"任务间传递数据的FIFO缓冲区",ex:"xQueueSend()",diff:2},
+  {id:"rt009",en:"tick",cn:"时钟节拍",cat:"rtos",def:"RTOS的基本时间单位",ex:"portTICK_PERIOD_MS",diff:2},
+  {id:"rt010",en:"block",cn:"阻塞",cat:"rtos",def:"任务等待某个事件时进入的状态",ex:"",diff:2},
+  {id:"rt011",en:"suspend",cn:"挂起",cat:"rtos",def:"暂停任务的执行直到被显式恢复",ex:"vTaskSuspend()",diff:2},
+  {id:"rt012",en:"resume",cn:"恢复",cat:"rtos",def:"恢复被挂起任务的执行",ex:"vTaskResume()",diff:2},
+  {id:"rt013",en:"yield",cn:"让出",cat:"rtos",def:"当前任务主动放弃CPU使用权",ex:"taskYIELD()",diff:2},
+  {id:"rt014",en:"idle",cn:"空闲任务",cat:"rtos",def:"没有其他任务可运行时执行的默认任务",ex:"",diff:2},
+  {id:"rt015",en:"deadline",cn:"截止时间",cat:"rtos",def:"任务必须在此时间之前完成执行",ex:"",diff:3},
+  {id:"rt016",en:"jitter",cn:"抖动",cat:"rtos",def:"任务实际响应时间与预期时间的偏差",ex:"",diff:3},
+  {id:"rt017",en:"latency",cn:"延迟",cat:"rtos",def:"从事件发生到任务响应的时间差",ex:"interrupt latency",diff:3},
+  {id:"rt018",en:"critical",cn:"临界区",cat:"rtos",def:"不可被中断打断的代码段",ex:"taskENTER_CRITICAL()",diff:3},
+  {id:"rt019",en:"event",cn:"事件",cat:"rtos",def:"用于任务间通信的信号机制",ex:"xEventGroupSetBits()",diff:2},
+  {id:"rt020",en:"stack",cn:"任务栈",cat:"rtos",def:"每个任务独立拥有的内存空间",ex:"configMINIMAL_STACK_SIZE",diff:2},
+
+  // ── 调试与测试 (debugging-testing) ──
+  {id:"db001",en:"debug",cn:"调试",cat:"debugging-testing",def:"查找和修复程序错误的过程",ex:"",diff:1},
+  {id:"db002",en:"breakpoint",cn:"断点",cat:"debugging-testing",def:"程序执行到此处暂停的位置",ex:"",diff:2},
+  {id:"db003",en:"trace",cn:"追踪",cat:"debugging-testing",def:"记录程序执行过程以分析问题",ex:"",diff:2},
+  {id:"db004",en:"assertion",cn:"断言",cat:"debugging-testing",def:"检查程序中必须为真的条件",ex:"assert(x != NULL);",diff:2},
+  {id:"db005",en:"log",cn:"日志",cat:"debugging-testing",def:"程序运行时记录的事件信息",ex:"printf(\"error: %d\", code)",diff:1},
+  {id:"db006",en:"crash",cn:"崩溃",cat:"debugging-testing",def:"程序异常终止",ex:"",diff:1},
+  {id:"db007",en:"hang",cn:"挂起/卡死",cat:"debugging-testing",def:"程序停止响应",ex:"",diff:1},
+  {id:"db008",en:"step",cn:"单步执行",cat:"debugging-testing",def:"逐条执行程序指令以观察行为",ex:"",diff:2},
+  {id:"db009",en:"watch",cn:"监视",cat:"debugging-testing",def:"在调试时观察变量值的变化",ex:"",diff:2},
+  {id:"db010",en:"stack trace",cn:"栈回溯",cat:"debugging-testing",def:"显示函数调用链的调试信息",ex:"",diff:3},
+  {id:"db011",en:"JTAG",cn:"联合测试行动组接口",cat:"debugging-testing",def:"嵌入式系统常用的调试和编程接口",ex:"",diff:3},
+  {id:"db012",en:"SWD",cn:"串行线调试",cat:"debugging-testing",def:"ARM芯片的两线调试接口",ex:"",diff:3},
+  {id:"db013",en:"probe",cn:"调试探针",cat:"debugging-testing",def:"连接调试器和目标硬件的设备",ex:"J-Link, ST-Link",diff:2},
+  {id:"db014",en:"unit test",cn:"单元测试",cat:"debugging-testing",def:"对单个函数或模块进行独立测试",ex:"",diff:2},
+  {id:"db015",en:"regression",cn:"回归",cat:"debugging-testing",def:"新修改导致原有功能出错",ex:"",diff:3},
+  {id:"db016",en:"verify",cn:"验证",cat:"debugging-testing",def:"确认程序行为符合预期",ex:"",diff:1},
+  {id:"db017",en:"validate",cn:"校验",cat:"debugging-testing",def:"检查数据或输入的有效性",ex:"",diff:1},
+  {id:"db018",en:"trap",cn:"陷阱",cat:"debugging-testing",def:"导致程序进入调试模式的指令",ex:"",diff:3},
+  {id:"db019",en:"dump",cn:"转储",cat:"debugging-testing",def:"将内存或寄存器内容输出以供分析",ex:"core dump",diff:2},
+  {id:"db020",en:"halt",cn:"暂停",cat:"debugging-testing",def:"停止CPU执行",ex:"",diff:1},
+
+  // ── 编译与构建 (compilation-build) ──
+  {id:"cb001",en:"compiler",cn:"编译器",cat:"compilation-build",def:"将源代码翻译成机器码的工具",ex:"gcc, arm-none-eabi-gcc",diff:1},
+  {id:"cb002",en:"linker",cn:"链接器",cat:"compilation-build",def:"将多个目标文件合并成可执行文件",ex:"ld",diff:2},
+  {id:"cb003",en:"assemble",cn:"汇编",cat:"compilation-build",def:"将汇编代码转换为机器码",ex:"",diff:2},
+  {id:"cb004",en:"makefile",cn:"构建文件",cat:"compilation-build",def:"描述项目编译规则的文件",ex:"",diff:2},
+  {id:"cb005",en:"toolchain",cn:"工具链",cat:"compilation-build",def:"编译、链接、调试等工具的集合",ex:"ARM GCC toolchain",diff:2},
+  {id:"cb006",en:"cross-compile",cn:"交叉编译",cat:"compilation-build",def:"在一个平台上编译另一个平台的代码",ex:"",diff:2},
+  {id:"cb007",en:"preprocessor",cn:"预处理器",cat:"compilation-build",def:"在编译前处理宏和头文件的工具",ex:"",diff:2},
+  {id:"cb008",en:"directive",cn:"预处理指令",cat:"compilation-build",def:"以#开头的预处理器命令",ex:"#define, #ifdef",diff:2},
+  {id:"cb009",en:"optimize",cn:"优化",cat:"compilation-build",def:"编译器对代码进行性能或空间改善",ex:"-O2, -Os",diff:2},
+  {id:"cb010",en:"symbol",cn:"符号",cat:"compilation-build",def:"链接时使用的函数和变量名称",ex:"",diff:2},
+  {id:"cb011",en:"object file",cn:"目标文件",cat:"compilation-build",def:"编译器生成的中间文件(.o)",ex:"main.o",diff:2},
+  {id:"cb012",en:"binary",cn:"二进制文件",cat:"compilation-build",def:"机器可直接执行的代码文件",ex:"firmware.bin",diff:1},
+  {id:"cb013",en:"hex file",cn:"十六进制文件",cat:"compilation-build",def:"以十六进制格式存储的可执行文件",ex:"firmware.hex",diff:2},
+  {id:"cb014",en:"elf",cn:"可执行可链接格式",cat:"compilation-build",def:"Unix系统常用的可执行文件格式",ex:"firmware.elf",diff:3},
+  {id:"cb015",en:"map file",cn:"映射文件",cat:"compilation-build",def:"显示内存布局和符号地址的文件",ex:"firmware.map",diff:3},
+];
+
+EST.data.CATEGORIES = [
+  {id:"programming-basics",name:"编程基础概念"},
+  {id:"data-types",name:"数据类型与变量"},
+  {id:"control-flow",name:"控制流程"},
+  {id:"functions-modules",name:"函数与模块化"},
+  {id:"memory-management",name:"内存管理"},
+  {id:"embedded-hardware",name:"嵌入式硬件"},
+  {id:"communication-protocols",name:"通信协议"},
+  {id:"rtos",name:"实时操作系统"},
+  {id:"debugging-testing",name:"调试与测试"},
+  {id:"compilation-build",name:"编译与构建"},
+];
+
+EST.data.initVocab = () => {
+  let vocab = EST.data.loadVocab();
+  if(!vocab || vocab.length===0){
+    vocab = EST.data.BUILTIN_VOCAB;
+    EST.data.saveVocab(vocab);
+  }
+  // Initialize state for any words without it
+  const state = EST.data.loadState();
+  let updated = false;
+  vocab.forEach(w => {
+    if(!state[w.id]){
+      state[w.id] = {
+        level:0, nextReview:EST.utils.getNow(), reviewCount:0,
+        correctCount:0, incorrectCount:0, lastReview:0,
+        streakCorrect:0, firstSeen:0, graduated:false
+      };
+      updated = true;
+    }
+  });
+  if(updated) EST.data.saveState(state);
+  // Populate category filter
+  const sel = document.getElementById('vocab-filter-category');
+  if(sel && sel.options.length <= 1){
+    EST.data.CATEGORIES.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+  }
+  return vocab;
+};
+
+/* ============================================================
+   SRS ENGINE
+   ============================================================ */
+// Intervals in milliseconds for each level
+EST.srs.INTERVALS = [
+  10 * 60 * 1000,       // Level 0: 10 minutes
+  60 * 60 * 1000,       // Level 1: 1 hour
+  24 * 60 * 60 * 1000,  // Level 2: 1 day
+  3 * 24 * 60 * 60 * 1000,  // Level 3: 3 days
+  7 * 24 * 60 * 60 * 1000,  // Level 4: 7 days
+];
+
+// Graduation threshold: how many consecutive correct at level 4 to graduate
+EST.srs.GRADUATION_STREAK = 3;
+
+EST.srs.computeQueue = () => {
+  const now = EST.utils.getNow();
+  const state = EST.data.loadState();
+  const queue = [];
+  for(const [wordId, s] of Object.entries(state)){
+    if(s.graduated) continue;
+    if(s.nextReview <= now){
+      queue.push({
+        wordId,
+        level: s.level,
+        overdue: now - s.nextReview,
+        priority: (now - s.nextReview) + ((4 - s.level) * 3600000) + ((s.incorrectCount||0) * 600000)
+      });
+    }
+  }
+  queue.sort((a,b) => b.priority - a.priority);
+  return queue;
+};
+
+EST.srs.getDueCount = () => EST.srs.computeQueue().length;
+
+EST.srs.getMasteryRate = () => {
+  const state = EST.data.loadState();
+  const words = Object.values(state);
+  if(words.length===0) return 0;
+  const total = words.reduce((sum,s)=>sum+s.level,0);
+  return Math.round((total/(words.length*4))*100);
+};
+
+EST.srs.getLevelDistribution = () => {
+  const state = EST.data.loadState();
+  const dist = [0,0,0,0,0];
+  Object.values(state).forEach(s=>{if(s.level>=0&&s.level<=4) dist[s.level]++;});
+  return dist;
+};
+
+EST.srs.updateLevel = (wordId, correct) => {
+  const state = EST.data.loadState();
+  const s = state[wordId];
+  if(!s) return null;
+  const now = EST.utils.getNow();
+
+  s.lastReview = now;
+  s.reviewCount = (s.reviewCount||0) + 1;
+
+  if(correct){
+    s.correctCount = (s.correctCount||0) + 1;
+    s.streakCorrect = (s.streakCorrect||0) + 1;
+    if(s.level < 4){
+      s.level++;
+    } else if(s.level === 4 && s.streakCorrect >= EST.srs.GRADUATION_STREAK){
+      s.graduated = true;
+    }
+  } else {
+    s.incorrectCount = (s.incorrectCount||0) + 1;
+    s.streakCorrect = 0;
+    if(s.level > 0) s.level--;
+  }
+
+  s.nextReview = now + EST.srs.INTERVALS[Math.min(s.level,4)];
+
+  // Track today's activity
+  EST.srs._recordDailyActivity(correct);
+
+  EST.data.saveState(state);
+  return s;
+};
+
+EST.srs._recordDailyActivity = (correct) => {
+  const today = EST.utils.todayStr();
+  const daily = EST.data.loadDaily();
+  if(!daily[today]){
+    daily[today] = {wordsReviewed:0,wordsLearned:0,correctRate:0,timeSpentMinutes:0,longestStreak:0};
+  }
+  const d = daily[today];
+  d.wordsReviewed++;
+  const totalCorrect = Math.round(d.correctRate * (d.wordsReviewed-1));
+  d.correctRate = correct ? (totalCorrect+1)/d.wordsReviewed : totalCorrect/d.wordsReviewed;
+  EST.data.saveDaily(daily);
+};
+
+EST.srs.getStreak = () => {
+  const daily = EST.data.loadDaily();
+  let streak = 0;
+  const today = new Date();
+  // Check consecutive days backwards
+  for(let i=0;i<365;i++){
+    const d = new Date(today);
+    d.setDate(d.getDate()-i);
+    const key = EST.utils.formatDate(d.getTime());
+    if(daily[key] && daily[key].wordsReviewed > 0){
+      streak++;
+    } else if(i===0){
+      // Today doesn't have to have activity yet
+      continue;
+    } else {
+      break;
+    }
+  }
+  return streak;
+};
+
+EST.srs.getTodayStats = () => {
+  const daily = EST.data.loadDaily();
+  const today = EST.utils.todayStr();
+  const td = daily[today];
+  return {
+    reviewed: td ? td.wordsReviewed : 0,
+    learned: td ? td.wordsLearned : 0,
+    correctRate: td ? Math.round(td.correctRate*100) : 0
+  };
+};
+
+/* ============================================================
+   HELPER: Get vocabulary by ID
+   ============================================================ */
+EST.data.getWordById = (id) => {
+  const vocab = EST.data.loadVocab();
+  return vocab.find(w => w.id === id) || null;
+};
+
+EST.data.getCategoryName = (catId) => {
+  const cat = EST.data.CATEGORIES.find(c => c.id === catId);
+  return cat ? cat.name : catId;
+};
+
+/* ============================================================
+   UI LAYER
+   ============================================================ */
+EST.ui.switchView = (name) => {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target = document.getElementById('view-'+name);
+  if(target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const tab = document.querySelector(`.nav-tab[data-view="${name}"]`);
+  if(tab) tab.classList.add('active');
+
+  // Auto-start learning modes when navigating to their views
+  if(name==='home') EST.ui.refreshHome();
+  if(name==='flashcard') EST.modes.flashcard.start();
+  if(name==='spelling') EST.modes.spelling.start();
+  if(name==='stats') EST.ui.refreshStats();
+  if(name==='vocabulary') EST.ui.refreshVocabList();
+};
+
+EST.ui.toast = (msg,type='') => {
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast '+type+' show';
+  clearTimeout(el._timer);
+  el._timer=setTimeout(()=>el.classList.remove('show'),2000);
+};
+
+EST.ui.showModal = (html) => {
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('modal-overlay').classList.add('active');
+};
+
+EST.ui.hideModal = () => {
+  document.getElementById('modal-overlay').classList.remove('active');
+};
+
+EST.ui.refreshHome = () => {
+  const dueCount = EST.srs.getDueCount();
+  const todayStats = EST.srs.getTodayStats();
+  const streak = EST.srs.getStreak();
+  const mastery = EST.srs.getMasteryRate();
+
+  const elDue = document.getElementById('stat-due');
+  const elToday = document.getElementById('stat-today');
+  const elStreak = document.getElementById('stat-streak');
+  const elMastery = document.getElementById('stat-mastery');
+
+  if(elDue) elDue.textContent = dueCount;
+  if(elToday) elToday.textContent = todayStats.reviewed;
+  if(elStreak) elStreak.textContent = streak;
+  if(elMastery) elMastery.textContent = mastery+'%';
+
+  // Update start review button state
+  const btnReview = document.getElementById('btn-start-review');
+  if(btnReview){
+    btnReview.disabled = dueCount === 0;
+    btnReview.textContent = dueCount===0 ? '暂无待复习单词' : '开始复习（'+dueCount+'个）';
+  }
+};
+
+EST.ui.refreshStats = () => {
+  const dist = EST.srs.getLevelDistribution();
+  const total = dist.reduce((a,b)=>a+b,0);
+  const levelNames = ['完全不认识','有点印象','认识但不会用','基本掌握','完全掌握'];
+  const colors = ['var(--level-0)','var(--level-1)','var(--level-2)','var(--level-3)','var(--level-4)'];
+
+  const container = document.getElementById('stats-content');
+  if(!container) return;
+
+  let html = '<div class="stats-grid" style="margin-bottom:var(--space-lg)">';
+  html += `<div class="stat-card"><div class="stat-value">${EST.srs.getDueCount()}</div><div class="stat-label">待复习</div></div>`;
+  html += `<div class="stat-card"><div class="stat-value">${EST.srs.getMasteryRate()}%</div><div class="stat-label">总体掌握率</div></div>`;
+  html += `<div class="stat-card"><div class="stat-value">${EST.srs.getStreak()}</div><div class="stat-label">连续学习天数</div></div>`;
+  html += `<div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">总词汇量</div></div>`;
+  html += '</div>';
+
+  // Level distribution bars
+  html += '<div class="card" style="margin-bottom:var(--space-lg)"><div class="card-header">掌握等级分布</div>';
+  dist.forEach((count,i)=>{
+    const pct = total?Math.round(count/total*100):0;
+    html += `<div style="margin-bottom:var(--space-sm)">
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:2px">
+        <span>${levelNames[i]}</span><span>${count} (${pct}%)</span>
+      </div>
+      <div class="progress-bar"><div class="progress-bar-fill level-${i}" style="width:${pct}%;background:${colors[i]}"></div></div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // Daily log summary
+  const daily = EST.data.loadDaily();
+  const keys = Object.keys(daily).sort().slice(-14);
+  if(keys.length>0){
+    html += '<div class="card"><div class="card-header">最近学习记录</div>';
+    html += '<div style="max-height:200px;overflow-y:auto">';
+    keys.reverse().forEach(k=>{
+      const d = daily[k];
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem">
+        <span>${k}</span>
+        <span style="color:var(--text-secondary)">复习${d.wordsReviewed}词 · 正确率${Math.round(d.correctRate*100)}%</span>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
+};
+
+EST.ui.refreshVocabList = () => {
+  const vocab = EST.data.loadVocab();
+  const state = EST.data.loadState();
+  const searchTerm = (document.getElementById('vocab-search')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('vocab-filter-category')?.value || 'all';
+  const levelFilter = document.getElementById('vocab-filter-level')?.value || 'all';
+
+  let filtered = vocab;
+  if(catFilter!=='all') filtered = filtered.filter(w=>w.cat===catFilter);
+  if(levelFilter!=='all'){
+    const lvl = parseInt(levelFilter);
+    filtered = filtered.filter(w=>(state[w.id]?.level??0)===lvl);
+  }
+  if(searchTerm){
+    filtered = filtered.filter(w=>
+      w.en.toLowerCase().includes(searchTerm) ||
+      w.cn.includes(searchTerm) ||
+      (w.def||'').includes(searchTerm)
+    );
+  }
+
+  const container = document.getElementById('vocab-list');
+  if(!container) return;
+  if(filtered.length===0){
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">&#128269;</div>
+      <h3>未找到匹配的词汇</h3>
+      <p>尝试调整搜索条件或筛选器</p>
+    </div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  filtered.forEach(w => {
+    const s = state[w.id] || {level:0};
+    const catName = EST.data.getCategoryName(w.cat);
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.cssText = 'margin-bottom:var(--space-sm);cursor:pointer';
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-sm)">
+        <div style="flex:1;min-width:0">
+          <span class="en-word" style="font-size:1.2rem;font-weight:700">${EST.utils.escapeHtml(w.en)}</span>
+          <span style="color:var(--text-secondary);margin-left:var(--space-sm)">${EST.utils.escapeHtml(w.cn)}</span>
+        </div>
+        <span class="badge badge-level-${s.level}">${['不认识','有印象','不会用','基本掌握','完全掌握'][s.level]}</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--text-muted);margin-top:var(--space-xs)">
+        ${EST.utils.escapeHtml(catName)}${w.diff ? ' · 难度'+'★'.repeat(w.diff) : ''}
+      </div>`;
+    div.addEventListener('click',()=>EST.ui.showWordDetail(w,s));
+    frag.appendChild(div);
+  });
+  container.innerHTML = '';
+  container.appendChild(frag);
+};
+
+EST.ui.showWordDetail = (word, state) => {
+  const catName = EST.data.getCategoryName(word.cat);
+  const levelNames = ['完全不认识','有点印象','认识但不会用','基本掌握','完全掌握'];
+  const now = EST.utils.getNow();
+  const dueStr = (state.nextReview && state.nextReview > now)
+    ? '下次复习：'+EST.utils.formatDate(state.nextReview)
+    : state.nextReview ? '现在可以复习' : '尚未学习';
+  EST.ui.showModal(`
+    <h3 style="display:flex;align-items:center;gap:var(--space-sm)">
+      <span class="en-word" style="font-size:1.5rem">${EST.utils.escapeHtml(word.en)}</span>
+      <span class="badge badge-level-${state.level}">${levelNames[state.level]}</span>
+    </h3>
+    <p style="font-size:1.1rem;color:var(--text-secondary);margin-bottom:var(--space-md)">${EST.utils.escapeHtml(word.cn)}</p>
+    ${word.def?`<p style="margin-bottom:var(--space-sm)"><strong>释义：</strong>${EST.utils.escapeHtml(word.def)}</p>`:''}
+    ${word.ex?`<p style="margin-bottom:var(--space-sm)"><code style="background:var(--bg-tertiary);padding:2px 8px;border-radius:4px;font-size:.85rem">${EST.utils.escapeHtml(word.ex)}</code></p>`:''}
+    <div style="display:flex;gap:var(--space-md);font-size:.85rem;color:var(--text-muted);margin-bottom:var(--space-md);flex-wrap:wrap">
+      <span>分类：${EST.utils.escapeHtml(catName)}</span>
+      <span>难度：${'★'.repeat(word.diff||1)}</span>
+      <span>复习次数：${state.reviewCount||0}</span>
+      <span>正确率：${state.reviewCount?Math.round((state.correctCount||0)/state.reviewCount*100)+'%':'N/A'}</span>
+    </div>
+    <p style="font-size:.8rem;color:var(--text-muted)">${dueStr}</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="EST.ui.hideModal()">关闭</button>
+    </div>
+  `);
+};
+
+/* ============================================================
+   LEARNING MODES
+   ============================================================ */
+
+/* ── Flashcard Mode ── */
+EST.modes.flashcard = {
+  queue: [],
+  index: 0,
+  flipped: false,
+  hintRevealed: false,
+
+  start: function(){
+    this.queue = EST.srs.computeQueue();
+    if(this.queue.length===0){
+      EST.ui.toast('暂无待复习单词！','error');
+      return;
+    }
+    this.index = 0;
+    this.render();
+  },
+
+  render: function(){
+    if(this.index >= this.queue.length){
+      this.finish();
+      return;
+    }
+    const item = this.queue[this.index];
+    const word = EST.data.getWordById(item.wordId);
+    if(!word){ this.next(); return; }
+    const state = EST.data.loadState()[item.wordId] || {level:0};
+    this.flipped = false;
+    this.hintRevealed = false;
+
+    const container = document.getElementById('flashcard-content');
+    const levelNames = ['完全不认识','有点印象','认识但不会用','基本掌握','完全掌握'];
+    container.innerHTML = `
+      <div class="flashcard-progress">第 ${this.index+1} / ${this.queue.length} 个 · 等级：${levelNames[state.level]}</div>
+      <div class="flashcard-scene" style="margin-top:var(--space-lg)">
+        <div class="flashcard" id="flashcard-el">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">中文释义</div>
+            <div class="flashcard-word" style="font-size:1.6rem">${EST.utils.escapeHtml(word.cn)}</div>
+            <div class="flashcard-hint">${word.def?EST.utils.escapeHtml(word.def):''}</div>
+            <div style="font-size:.8rem;color:var(--text-muted)">点击卡片或按空格键翻转</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">英文单词</div>
+            <div class="flashcard-word en-word">${EST.utils.escapeHtml(word.en)}</div>
+            ${word.ex?`<div style="font-size:.85rem;color:var(--text-muted);margin-top:var(--space-sm)"><code>${EST.utils.escapeHtml(word.ex)}</code></div>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-hint" style="text-align:center;margin-top:var(--space-md);min-height:24px" id="fc-hint"></div>
+      <div class="rating-bar">
+        <button class="rating-btn r0" data-rate="0" title="完全不认识">不认识</button>
+        <button class="rating-btn r1" data-rate="1" title="有点印象">有印象</button>
+        <button class="rating-btn r2" data-rate="2" title="认识但不会用">不会用</button>
+        <button class="rating-btn r3" data-rate="3" title="基本掌握">基本会</button>
+        <button class="rating-btn r4" data-rate="4" title="完全掌握">完全会</button>
+      </div>
+      <div class="flashcard-actions">
+        <button class="btn btn-ghost btn-sm" id="fc-hint-btn">显示首字母</button>
+        <button class="btn btn-ghost btn-sm" id="fc-speak-btn">&#128266; 发音</button>
+        <button class="btn btn-outline btn-sm" id="fc-skip-btn">跳过</button>
+      </div>`;
+
+    // Flip on card click
+    document.getElementById('flashcard-el').addEventListener('click',()=>this.flip());
+
+    // Rating buttons
+    container.querySelectorAll('.rating-btn').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        const rate = parseInt(btn.dataset.rate);
+        this.rate(rate);
+      });
+    });
+
+    // Hint button
+    document.getElementById('fc-hint-btn').addEventListener('click',()=>this.showHint(word));
+    // Speak button
+    document.getElementById('fc-speak-btn').addEventListener('click',()=>this.speak(word.en));
+    // Skip button
+    document.getElementById('fc-skip-btn').addEventListener('click',()=>this.skip());
+  },
+
+  flip: function(){
+    this.flipped = true;
+    document.getElementById('flashcard-el').classList.add('flipped');
+  },
+
+  showHint: function(word){
+    if(this.hintRevealed) return;
+    this.hintRevealed = true;
+    document.getElementById('fc-hint').textContent = '首字母：'+word.en[0]+'（共'+word.en.length+'个字母）';
+  },
+
+  speak: function(text){
+    if(!('speechSynthesis' in window)){ EST.ui.toast('浏览器不支持发音','error'); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='en-US'; u.rate=0.8;
+    speechSynthesis.speak(u);
+  },
+
+  rate: function(level){
+    if(!this.flipped){ EST.ui.toast('请先翻转卡片查看答案'); return; }
+    const item = this.queue[this.index];
+    const word = EST.data.getWordById(item.wordId);
+    if(!word || !word.en) return;
+
+    // User rated themselves: if they rated >= their old level+1 or at max, treat as correct
+    const oldState = EST.data.loadState()[item.wordId] || {level:0};
+    const correct = level >= oldState.level + 1 || (level === 4 && oldState.level === 4);
+    EST.srs.updateLevel(item.wordId, correct);
+    this.index++;
+    setTimeout(()=>{this.flipped=false;this.render();},300);
+  },
+
+  skip: function(){
+    this.index++;
+    this.render();
+  },
+
+  finish: function(){
+    const container = document.getElementById('flashcard-content');
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">&#127881;</div>
+      <h3>本轮复习完成！</h3>
+      <p>你已经复习了所有待复习的单词。继续保持！</p>
+      <button class="btn btn-primary" onclick="EST.ui.switchView('home')">返回首页</button>
+    </div>`;
+    EST.ui.refreshHome();
+  }
+};
+
+/* ── Spelling Mode ── */
+EST.modes.spelling = {
+  queue: [],
+  index: 0,
+  currentWord: null,
+
+  start: function(){
+    this.queue = EST.srs.computeQueue();
+    if(this.queue.length===0){
+      const vocab = EST.data.loadVocab();
+      const state = EST.data.loadState();
+      const all = vocab.map(w=>({wordId:w.id,level:state[w.id]?.level||0,overdue:0,priority:Math.random()}));
+      this.queue = all.sort((a,b)=>a.level-b.level||b.priority-a.priority).slice(0,20);
+    }
+    if(this.queue.length===0){ EST.ui.toast('暂无词汇数据','error'); return; }
+    this.index = 0;
+    this.render();
+  },
+
+  render: function(){
+    if(this.index >= this.queue.length){ this.finish(); return; }
+    const item = this.queue[this.index];
+    const word = EST.data.getWordById(item.wordId);
+    if(!word){ this.next(); return; }
+    this.currentWord = word;
+
+    const container = document.getElementById('spelling-content');
+    container.innerHTML = `
+      <div class="flashcard-progress">第 ${this.index+1} / ${this.queue.length} 个</div>
+      <div class="spell-input-container" style="margin-top:var(--space-lg)">
+        <div class="spell-prompt">${EST.utils.escapeHtml(word.cn)}</div>
+        <div class="spell-hint">${word.def?EST.utils.escapeHtml(word.def):''}</div>
+        <div style="margin-bottom:var(--space-md)">
+          <span style="font-size:.9rem;color:var(--text-muted)">${'_ '.repeat(word.en.length)}（${word.en.length}个字母）</span>
+        </div>
+        <input type="text" class="input-field en-word" id="spell-input" placeholder="输入英文单词..." autocomplete="off" autocapitalize="off" spellcheck="false" style="text-align:center;max-width:400px;font-size:1.2rem">
+        <div id="spell-result"></div>
+        <div style="margin-top:var(--space-md);display:flex;gap:var(--space-sm);justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" id="spell-submit">提交</button>
+          <button class="btn btn-ghost btn-sm" id="spell-hint-btn">显示首字母</button>
+          <button class="btn btn-outline btn-sm" id="spell-skip">跳过</button>
+        </div>
+      </div>`;
+
+    const input = document.getElementById('spell-input');
+    input.focus();
+    input.addEventListener('keydown',(e)=>{ if(e.key==='Enter') this.check(); });
+    document.getElementById('spell-submit').addEventListener('click',()=>this.check());
+    document.getElementById('spell-hint-btn').addEventListener('click',()=>{
+      input.value = word.en[0];
+      input.focus();
+    });
+    document.getElementById('spell-skip').addEventListener('click',()=>this.skip());
+  },
+
+  check: function(){
+    const input = document.getElementById('spell-input');
+    const userAnswer = input.value.trim();
+    const word = this.currentWord;
+    if(!userAnswer){ EST.ui.toast('请输入单词'); return; }
+
+    const correct = userAnswer.toLowerCase() === word.en.toLowerCase();
+    const resultEl = document.getElementById('spell-result');
+
+    if(correct){
+      resultEl.innerHTML = `<div class="spell-result correct">&#10004; 正确！ ${EST.utils.escapeHtml(word.en)}</div>`;
+      EST.srs.updateLevel(word.id, true);
+      input.disabled = true;
+      document.getElementById('spell-submit').disabled = true;
+      setTimeout(()=>{this.index++;this.render();},1200);
+    } else {
+      // Show diff
+      let diffHtml = '';
+      const maxLen = Math.max(userAnswer.length, word.en.length);
+      for(let i=0;i<maxLen;i++){
+        const uc = userAnswer[i]||'_';
+        const wc = word.en[i]||'_';
+        if(uc.toLowerCase()===wc.toLowerCase()){
+          diffHtml += `<span style="color:var(--success)">${EST.utils.escapeHtml(uc)}</span>`;
+        } else {
+          diffHtml += `<span style="color:var(--danger);font-weight:700">${EST.utils.escapeHtml(uc)}</span>`;
+        }
+      }
+      resultEl.innerHTML = `<div class="spell-result wrong">&#10008; 错误<br>你的输入：${diffHtml}<br>正确答案：<span class="en-word" style="font-size:1.1rem">${EST.utils.escapeHtml(word.en)}</span></div>`;
+      EST.srs.updateLevel(word.id, false);
+      input.disabled = true;
+      document.getElementById('spell-submit').disabled = true;
+      setTimeout(()=>{this.index++;this.render();},2000);
+    }
+  },
+
+  skip: function(){ this.index++; this.render(); },
+
+  finish: function(){
+    const container = document.getElementById('spelling-content');
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">&#127881;</div>
+      <h3>拼写练习完成！</h3>
+      <p>继续加油，拼写能力会越来越强！</p>
+      <button class="btn btn-primary" onclick="EST.ui.switchView('home')">返回首页</button>
+    </div>`;
+    EST.ui.refreshHome();
+  }
+};
+
+/* ── Quiz Mode ── */
+EST.modes.quiz = {
+  questions: [],
+  index: 0,
+  score: 0,
+  wrongList: [],
+
+  start: function(){
+    const settings = EST.data.loadSettings();
+    const count = settings.quizQuestionCount || 10;
+    const vocab = EST.data.loadVocab();
+    if(vocab.length===0){ EST.ui.toast('暂无词汇数据','error'); return; }
+
+    // Generate questions: mix of choice and fill-blank
+    this.questions = [];
+    this.index = 0;
+    this.score = 0;
+    this.wrongList = [];
+
+    const pool = EST.utils.shuffle(vocab).slice(0,Math.min(count*3,vocab.length));
+    for(let i=0;i<count;i++){
+      const word = pool[i % pool.length];
+      const type = i%3===0?'choice-cn':(i%3===1?'choice-en':'fill');
+      this.questions.push(this.generateQuestion(word, pool, type));
+    }
+
+    EST.ui.switchView('quiz');
+    this.render();
+  },
+
+  generateQuestion: function(word, pool, type){
+    if(type==='choice-cn'){
+      // Show English, pick Chinese from 4 options
+      const distractors = pool.filter(w=>w.id!==word.id).slice(0,3);
+      while(distractors.length<3) distractors.push(pool[0]);
+      const options = EST.utils.shuffle([word,...distractors]);
+      return {
+        type:'choice-cn', word:word,
+        prompt:`请选择"<span class='en-word'>${EST.utils.escapeHtml(word.en)}</span>"的中文意思：`,
+        options: options.map(w=>w.cn),
+        correct: options.findIndex(w=>w.id===word.id),
+        correctAnswer: word.cn
+      };
+    } else if(type==='choice-en'){
+      // Show Chinese, pick English from 4 options
+      const distractors = pool.filter(w=>w.id!==word.id).slice(0,3);
+      while(distractors.length<3) distractors.push(pool[0]);
+      const options = EST.utils.shuffle([word,...distractors]);
+      return {
+        type:'choice-en', word:word,
+        prompt:`请选择"${EST.utils.escapeHtml(word.cn)}"的英文单词：`,
+        options: options.map(w=>w.en),
+        correct: options.findIndex(w=>w.id===word.id),
+        correctAnswer: word.en
+      };
+    } else {
+      // Fill in blank: show Chinese + first letter hint
+      return {
+        type:'fill', word:word,
+        prompt:`请拼写"${EST.utils.escapeHtml(word.cn)}"的英文单词：`,
+        hint: word.en[0]+'_'.repeat(word.en.length-1),
+        correctAnswer: word.en
+      };
+    }
+  },
+
+  render: function(){
+    if(this.index >= this.questions.length){ this.finish(); return; }
+    const q = this.questions[this.index];
+    const container = document.getElementById('quiz-content');
+
+    let inner = `
+      <div class="flashcard-progress">第 ${this.index+1} / ${this.questions.length} 题 · 得分：${this.score}</div>
+      <div class="card" style="margin-top:var(--space-lg);max-width:500px;margin-left:auto;margin-right:auto">
+        <div style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-lg);text-align:center">${q.prompt}</div>`;
+
+    if(q.type.startsWith('choice')){
+      inner += '<div class="quiz-options">';
+      q.options.forEach((opt,i)=>{
+        inner += `<button class="quiz-option" data-idx="${i}">${EST.utils.escapeHtml(opt)}</button>`;
+      });
+      inner += '</div>';
+    } else {
+      inner += `
+        <div style="text-align:center">
+          <div style="font-size:.9rem;color:var(--text-muted);margin-bottom:var(--space-md)">提示：${q.hint}</div>
+          <input type="text" class="input-field en-word" id="quiz-fill-input" placeholder="输入英文单词..." autocomplete="off" autocapitalize="off" spellcheck="false" style="text-align:center;max-width:300px;font-size:1.1rem">
+          <div style="margin-top:var(--space-md)">
+            <button class="btn btn-primary" id="quiz-fill-submit">提交</button>
+          </div>
+        </div>`;
+    }
+    inner += `<div id="quiz-feedback" style="margin-top:var(--space-md);text-align:center"></div></div>`;
+
+    container.innerHTML = inner;
+
+    if(q.type.startsWith('choice')){
+      container.querySelectorAll('.quiz-option').forEach(btn=>{
+        btn.addEventListener('click',(e)=>{
+          const idx = parseInt(btn.dataset.idx);
+          this.answerChoice(idx);
+        });
+      });
+    } else {
+      const input = document.getElementById('quiz-fill-input');
+      if(input){
+        input.focus();
+        input.addEventListener('keydown',(e)=>{if(e.key==='Enter') this.answerFill();});
+      }
+      const submitBtn = document.getElementById('quiz-fill-submit');
+      if(submitBtn) submitBtn.addEventListener('click',()=>this.answerFill());
+    }
+  },
+
+  answerChoice: function(idx){
+    const q = this.questions[this.index];
+    const correct = idx === q.correct;
+    const fb = document.getElementById('quiz-feedback');
+
+    // Disable all buttons and highlight
+    const allBtns = document.querySelectorAll('.quiz-option');
+    allBtns.forEach((b,i)=>{
+      b.disabled = true;
+      if(i===q.correct) b.classList.add('correct-pick');
+      if(i===idx && !correct) b.classList.add('wrong-pick');
+    });
+
+    if(correct){
+      this.score++;
+      fb.innerHTML = '<div class="spell-result correct">&#10004; 正确！</div>';
+      EST.srs.updateLevel(q.word.id, true);
+    } else {
+      this.wrongList.push(q);
+      fb.innerHTML = `<div class="spell-result wrong">&#10008; 错误！正确答案：${EST.utils.escapeHtml(q.correctAnswer)}</div>`;
+      EST.srs.updateLevel(q.word.id, false);
+    }
+
+    this.index++;
+    setTimeout(()=>this.render(),1200);
+  },
+
+  answerFill: function(){
+    const input = document.getElementById('quiz-fill-input');
+    if(!input) return;
+    const userAnswer = input.value.trim();
+    if(!userAnswer){ EST.ui.toast('请输入答案'); return; }
+
+    const q = this.questions[this.index];
+    const correct = userAnswer.toLowerCase() === q.correctAnswer.toLowerCase();
+    const fb = document.getElementById('quiz-feedback');
+    input.disabled = true;
+
+    if(correct){
+      this.score++;
+      fb.innerHTML = '<div class="spell-result correct">&#10004; 正确！</div>';
+      EST.srs.updateLevel(q.word.id, true);
+    } else {
+      this.wrongList.push(q);
+      fb.innerHTML = `<div class="spell-result wrong">&#10008; 错误！正确答案：<span class="en-word">${EST.utils.escapeHtml(q.correctAnswer)}</span></div>`;
+      EST.srs.updateLevel(q.word.id, false);
+    }
+
+    this.index++;
+    setTimeout(()=>this.render(),1200);
+  },
+
+  finish: function(){
+    const total = this.questions.length;
+    const pct = Math.round(this.score/total*100);
+    const container = document.getElementById('quiz-content');
+
+    let html = `<div class="card" style="text-align:center;max-width:500px;margin:0 auto">
+      <div style="font-size:3rem;margin-bottom:var(--space-md)">${pct>=80?'&#127881;':pct>=60?'&#128170;':'&#128218;'}</div>
+      <h3 style="margin-bottom:var(--space-sm)">测验完成！</h3>
+      <div style="font-size:2rem;font-weight:700;color:var(--primary);margin-bottom:var(--space-xs)">${this.score}/${total}</div>
+      <p style="color:var(--text-secondary);margin-bottom:var(--space-lg)">正确率 ${pct}%</p>`;
+
+    if(this.wrongList.length>0){
+      html += `<div style="text-align:left;margin-bottom:var(--space-lg)">
+        <h4 style="margin-bottom:var(--space-sm)">错题回顾（${this.wrongList.length}题）</h4>`;
+      this.wrongList.forEach(q=>{
+        html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem)">
+          <div>${q.prompt.replace(/<[^>]*>/g,'')}</div>
+          <div class="en-word" style="color:var(--danger);margin-top:2px">正确答案：${EST.utils.escapeHtml(q.correctAnswer)}</div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+
+    html += `<div class="btn-group" style="justify-content:center">
+      <button class="btn btn-primary" onclick="EST.modes.quiz.start()">再来一次</button>
+      <button class="btn btn-outline" onclick="EST.ui.switchView('home')">返回首页</button>
+    </div></div>`;
+
+    container.innerHTML = html;
+    EST.ui.refreshHome();
+  }
+};
+
+/* ============================================================
+   THEME & SETTINGS
+   ============================================================ */
+EST.ui.applyTheme = (theme) => {
+  document.documentElement.setAttribute('data-theme',theme);
+};
+
+EST.ui.applyFontSize = (size) => {
+  const map={small:'14px',medium:'16px',large:'18px'};
+  document.documentElement.style.fontSize=map[size]||'16px';
+};
+
+EST.ui.openSettings = () => {
+  const s=EST.data.loadSettings();
+  document.getElementById('setting-daily-goal').value=s.dailyGoal;
+  document.getElementById('setting-review-direction').value=s.reviewDirection;
+  document.getElementById('setting-theme').value=s.theme;
+  document.getElementById('setting-font-size').value=s.fontSize;
+  document.getElementById('setting-quiz-count').value=s.quizQuestionCount;
+  document.getElementById('setting-auto-audio').value=s.autoPlayAudio?'true':'false';
+  document.getElementById('settings-overlay').classList.add('active');
+};
+
+EST.ui.saveSettingsFromForm = () => {
+  const s = {
+    dailyGoal: parseInt(document.getElementById('setting-daily-goal').value),
+    reviewDirection: document.getElementById('setting-review-direction').value,
+    theme: document.getElementById('setting-theme').value,
+    fontSize: document.getElementById('setting-font-size').value,
+    quizQuestionCount: parseInt(document.getElementById('setting-quiz-count').value),
+    autoPlayAudio: document.getElementById('setting-auto-audio').value==='true',
+    firstRunComplete: true
+  };
+  EST.data.saveSettings(s);
+  EST.ui.applyTheme(s.theme);
+  EST.ui.applyFontSize(s.fontSize);
+  document.getElementById('settings-overlay').classList.remove('active');
+  EST.ui.toast('设置已保存','success');
+};
+
+EST.ui.exportData = () => {
+  const data = {
+    version: EST.VERSION,
+    vocabulary: EST.data.loadVocab(),
+    state: EST.data.loadState(),
+    settings: EST.data.loadSettings(),
+    daily: EST.data.loadDaily(),
+    exportedAt: EST.utils.getNow()
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url;
+  a.download=`english-study-backup-${EST.utils.todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  EST.ui.toast('数据已导出','success');
+};
+
+EST.ui.importData = () => {
+  const input = document.createElement('input');
+  input.type='file';
+  input.accept='.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try{
+        const data = JSON.parse(ev.target.result);
+        if(!data.vocabulary||!data.state){
+          EST.ui.toast('无效的备份文件','error');
+          return;
+        }
+        EST.data.saveVocab(data.vocabulary);
+        EST.data.saveState(data.state);
+        EST.data.saveSettings(data.settings||EST.data.loadSettings());
+        EST.data.saveDaily(data.daily||{});
+        localStorage.setItem('est_version',String(data.version||EST.VERSION));
+        EST.ui.applyTheme((data.settings||{}).theme||'light');
+        EST.ui.applyFontSize((data.settings||{}).fontSize||'medium');
+        EST.ui.toast('数据导入成功','success');
+        EST.ui.switchView('home');
+      }catch(err){
+        EST.ui.toast('文件解析失败，请检查文件格式','error');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+};
+
+EST.ui.resetData = () => {
+  EST.ui.showModal(`
+    <h3>确认重置</h3>
+    <p>这将清除所有学习记录和数据，包括词汇学习状态、每日记录和设置。此操作不可撤销！</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="EST.ui.hideModal()">取消</button>
+      <button class="btn btn-danger" id="btn-confirm-reset">确认重置</button>
+    </div>
+  `);
+  document.getElementById('btn-confirm-reset').onclick = () => {
+    ['est_vocabulary','est_state','est_settings','est_daily','est_version'].forEach(k=>localStorage.removeItem(k));
+    EST.ui.hideModal();
+    EST.ui.toast('所有数据已重置','success');
+    setTimeout(()=>location.reload(),500);
+  };
+};
+
+/* ============================================================
+   INIT
+   ============================================================ */
+EST.init = () => {
+  // Version check
+  const v = EST.data.getVersion();
+  if(v < EST.VERSION){
+    localStorage.setItem('est_version',String(EST.VERSION));
+  }
+
+  // Load & apply settings
+  const settings = EST.data.loadSettings();
+  EST.ui.applyTheme(settings.theme);
+  EST.ui.applyFontSize(settings.fontSize);
+
+  // Initialize vocabulary data
+  EST.data.initVocab();
+
+  // Navigation listeners
+  document.querySelectorAll('.nav-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>EST.ui.switchView(tab.dataset.view));
+  });
+
+  // Settings button
+  document.getElementById('btn-settings').addEventListener('click',EST.ui.openSettings);
+  document.getElementById('btn-settings-close').addEventListener('click',()=>{
+    EST.ui.saveSettingsFromForm();
+  });
+
+  // Settings overlay close on backdrop click
+  document.getElementById('settings-overlay').addEventListener('click',(e)=>{
+    if(e.target===document.getElementById('settings-overlay')){
+      EST.ui.saveSettingsFromForm();
+    }
+  });
+
+  // Modal backdrop close
+  document.getElementById('modal-overlay').addEventListener('click',(e)=>{
+    if(e.target===document.getElementById('modal-overlay')) EST.ui.hideModal();
+  });
+
+  // Data management buttons
+  document.getElementById('btn-export-data').addEventListener('click',EST.ui.exportData);
+  document.getElementById('btn-import-data').addEventListener('click',EST.ui.importData);
+  document.getElementById('btn-reset-data').addEventListener('click',EST.ui.resetData);
+
+  // Vocabulary search & filters
+  const vocabSearch = document.getElementById('vocab-search');
+  const vocabCatFilter = document.getElementById('vocab-filter-category');
+  const vocabLevelFilter = document.getElementById('vocab-filter-level');
+  if(vocabSearch) vocabSearch.addEventListener('input', EST.utils.debounce(()=>EST.ui.refreshVocabList(),300));
+  if(vocabCatFilter) vocabCatFilter.addEventListener('change', ()=>EST.ui.refreshVocabList());
+  if(vocabLevelFilter) vocabLevelFilter.addEventListener('change', ()=>EST.ui.refreshVocabList());
+
+  // Home page buttons
+  const btnReview = document.getElementById('btn-start-review');
+  const btnNewWords = document.getElementById('btn-new-words');
+  if(btnReview) btnReview.addEventListener('click',()=>EST.ui.switchView('flashcard'));
+  if(btnNewWords) btnNewWords.addEventListener('click',()=>EST.ui.switchView('vocabulary'));
+
+  // Quiz start button
+  const btnStartQuiz = document.getElementById('btn-start-quiz');
+  if(btnStartQuiz) btnStartQuiz.addEventListener('click',()=>EST.ui.switchView('quiz'));
+
+  // Refresh home on load
+  EST.ui.refreshHome();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape'){
+      EST.ui.hideModal();
+      document.getElementById('settings-overlay').classList.remove('active');
+    }
+    // Flashcard shortcuts (only when flashcard view is active)
+    if(document.getElementById('view-flashcard').classList.contains('active')){
+      if(e.key===' '||e.code==='Space'){
+        e.preventDefault();
+        const fc = EST.modes.flashcard;
+        if(!fc.flipped && fc.queue.length>0) fc.flip();
+      }
+      if(e.key>='1'&&e.key<='5'&&EST.modes.flashcard.flipped){
+        e.preventDefault();
+        EST.modes.flashcard.rate(parseInt(e.key)-1);
+      }
+    }
+  });
+
+  // First-run welcome
+  const settings = EST.data.loadSettings();
+  if(!settings.firstRunComplete){
+    setTimeout(()=>{
+      EST.ui.showModal(`
+        <h3>&#128075; 欢迎使用嵌入式英语学习工具！</h3>
+        <p>这是一个专为嵌入式软件工程师设计的英语词汇学习工具，帮助你掌握工作中必需的专业英语词汇。</p>
+        <div style="background:var(--bg-tertiary);border-radius:var(--radius);padding:var(--space-md);margin-bottom:var(--space-md);font-size:.85rem">
+          <p style="margin-bottom:var(--space-sm)"><strong>&#128214; 闪卡模式</strong> — 看中文释义，回忆英文单词，自评掌握程度</p>
+          <p style="margin-bottom:var(--space-sm)"><strong>&#9997; 拼写模式</strong> — 根据中文释义，练习拼写英文单词</p>
+          <p style="margin-bottom:var(--space-sm)"><strong>&#128221; 测验模式</strong> — 选择题+填空题，检验学习效果</p>
+          <p style="margin-bottom:0"><strong>&#128200; 统计面板</strong> — 查看学习进度和掌握情况</p>
+        </div>
+        <p style="font-size:.8rem;color:var(--text-muted)">提示：系统采用间隔重复算法，会根据你的掌握程度自动安排复习时间。所有数据保存在本地浏览器中，完全离线可用。</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" onclick="EST.ui.hideModal();EST.ui.completeFirstRun()">开始学习</button>
+        </div>
+      `);
+    },500);
+  }
+
+  console.log('EST initialized v'+EST.VERSION);
+};
+
+EST.ui.completeFirstRun = () => {
+  const s = EST.data.loadSettings();
+  s.firstRunComplete = true;
+  EST.data.saveSettings(s);
+};
+
+// Boot
+document.addEventListener('DOMContentLoaded',EST.init);
+</script>
+</body>
+</html>
