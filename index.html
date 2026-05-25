@@ -1795,8 +1795,7 @@ EST.init = () => {
     }
   });
 
-  // First-run welcome
-  const settings = EST.data.loadSettings();
+  // First-run welcome (settings already loaded on L1722)
   if(!settings.firstRunComplete){
     setTimeout(()=>{
       EST.ui.showModal(`
