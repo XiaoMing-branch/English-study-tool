@@ -1259,9 +1259,14 @@ EST.modes.flashcard = {
 
   speak: function(text){
     if(!('speechSynthesis' in window)){ EST.ui.toast('浏览器不支持发音','error'); return; }
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang='en-US'; u.rate=0.8;
-    speechSynthesis.speak(u);
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang='en-US'; u.rate=0.8;
+      speechSynthesis.speak(u);
+    }catch(e){
+      console.warn('Speech synthesis error:',e);
+      EST.ui.toast('发音功能暂不可用','error');
+    }
   },
 
   rate: function(level){
@@ -1712,6 +1717,12 @@ EST.ui.resetData = () => {
    INIT
    ============================================================ */
 EST.init = () => {
+  // Global error handler for uncaught exceptions
+  window.onerror = (msg, src, line, col, err) => {
+    console.error('EST uncaught error:', msg, 'at', src + ':' + line + ':' + col, err);
+    return false; // allow default browser error handling
+  };
+
   // Version check
   const v = EST.data.getVersion();
   if(v < EST.VERSION){
