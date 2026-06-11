@@ -1,13 +1,320 @@
-// 外部词库文件 - 工程启动时从此文件加载单词数据
+// 外部词库文件 - 车载嵌入式英语学习工具
+// 工程启动时从此文件加载单词数据
 // 如需添加单词，按相同格式追加到数组中即可
 window.__EST_EXTERNAL_VOCAB__ = [
+  {
+    "id": "ec001",
+    "en": "microcontroller",
+    "cn": "微控制器",
+    "cat": "embedded-core",
+    "def": "集成CPU、内存和外设的单芯片系统",
+    "ex": "STM32F407 is a Cortex-M4 microcontroller.",
+    "diff": 1
+  },
+  {
+    "id": "ec002",
+    "en": "microprocessor",
+    "cn": "微处理器",
+    "cat": "embedded-core",
+    "def": "仅包含CPU核心、需外接存储和外设的芯片",
+    "ex": "The MPU runs embedded Linux.",
+    "diff": 2
+  },
+  {
+    "id": "ec003",
+    "en": "interrupt",
+    "cn": "中断",
+    "cat": "embedded-core",
+    "def": "硬件触发暂停主程序执行特定处理的机制",
+    "ex": "void EXTI0_IRQHandler(void){ }",
+    "diff": 1
+  },
+  {
+    "id": "ec004",
+    "en": "timer",
+    "cn": "定时器",
+    "cat": "embedded-core",
+    "def": "产生精确时间间隔或计数的硬件外设",
+    "ex": "TIM2->ARR = 999; // 1ms period",
+    "diff": 1
+  },
+  {
+    "id": "ec005",
+    "en": "register",
+    "cn": "寄存器",
+    "cat": "embedded-core",
+    "def": "CPU内部或外设中用于配置和读取状态的高速存储单元",
+    "ex": "GPIOA->ODR |= (1<<5);",
+    "diff": 1
+  },
+  {
+    "id": "ec006",
+    "en": "GPIO",
+    "cn": "通用输入输出",
+    "cat": "embedded-core",
+    "def": "可配置为输入或输出的通用引脚",
+    "ex": "GPIO_InitStruct.Pin = GPIO_PIN_13;",
+    "diff": 1
+  },
+  {
+    "id": "ec007",
+    "en": "ADC",
+    "cn": "模数转换器",
+    "cat": "embedded-core",
+    "def": "将模拟电压信号转换为数字量",
+    "ex": "uint16_t adc_val = ADC1->DR;",
+    "diff": 1
+  },
+  {
+    "id": "ec008",
+    "en": "DAC",
+    "cn": "数模转换器",
+    "cat": "embedded-core",
+    "def": "将数字量转换为模拟电压输出",
+    "ex": "DAC1->DHR12R1 = 2048;",
+    "diff": 2
+  },
+  {
+    "id": "ec009",
+    "en": "PWM",
+    "cn": "脉宽调制",
+    "cat": "embedded-core",
+    "def": "通过调节占空比控制输出功率或模拟模拟信号",
+    "ex": "TIM1->CCR1 = duty; // set duty cycle",
+    "diff": 1
+  },
+  {
+    "id": "ec010",
+    "en": "DMA",
+    "cn": "直接存储器访问",
+    "cat": "embedded-core",
+    "def": "不经过CPU直接在内存和外设间传输数据",
+    "ex": "HAL_ADC_Start_DMA(&hadc1, buf, len);",
+    "diff": 2
+  },
+  {
+    "id": "ec011",
+    "en": "watchdog",
+    "cn": "看门狗",
+    "cat": "embedded-core",
+    "def": "定时器溢出则复位系统，防止程序跑飞",
+    "ex": "IWDG->KR = 0xAAAA; // refresh watchdog",
+    "diff": 1
+  },
+  {
+    "id": "ec012",
+    "en": "bootloader",
+    "cn": "引导加载程序",
+    "cat": "embedded-core",
+    "def": "系统上电后运行的首段代码，负责初始化并加载主程序",
+    "ex": "The bootloader checks CRC before jumping to app.",
+    "diff": 2
+  },
+  {
+    "id": "ec013",
+    "en": "firmware",
+    "cn": "固件",
+    "cat": "embedded-core",
+    "def": "固化在硬件中的底层控制软件",
+    "ex": "Flash the firmware via SWD.",
+    "diff": 1
+  },
+  {
+    "id": "ec014",
+    "en": "clock",
+    "cn": "时钟",
+    "cat": "embedded-core",
+    "def": "驱动处理器和外设工作的周期信号源",
+    "ex": "HCLK = 168 MHz, PCLK1 = 42 MHz.",
+    "diff": 1
+  },
+  {
+    "id": "ec015",
+    "en": "reset",
+    "cn": "复位",
+    "cat": "embedded-core",
+    "def": "将系统恢复到初始状态的操作",
+    "ex": "NVIC_SystemReset() triggers a software reset.",
+    "diff": 1
+  },
+  {
+    "id": "ap001",
+    "en": "CAN",
+    "cn": "控制器局域网",
+    "cat": "automotive-protocols",
+    "def": "汽车内部串行通信总线，抗干扰、多主节点",
+    "ex": "CAN_TxHeader.StdId = 0x18DA10F1;",
+    "diff": 1
+  },
+  {
+    "id": "ap002",
+    "en": "LIN",
+    "cn": "本地互连网络",
+    "cat": "automotive-protocols",
+    "def": "低成本单主多从串行总线，用于车身电子",
+    "ex": "LIN master sends header, slave responds.",
+    "diff": 2
+  },
+  {
+    "id": "ap003",
+    "en": "FlexRay",
+    "cn": "FlexRay总线",
+    "cat": "automotive-protocols",
+    "def": "高速确定性总线，用于线控制动和转向等实时控制",
+    "ex": "FlexRay supports both static and dynamic segments.",
+    "diff": 3
+  },
+  {
+    "id": "ap004",
+    "en": "AUTOSAR",
+    "cn": "汽车开放系统架构",
+    "cat": "automotive-protocols",
+    "def": "标准化的汽车软件架构，分层解耦应用与硬件",
+    "ex": "Configure the BSW module in AUTOSAR.",
+    "diff": 3
+  },
+  {
+    "id": "ap005",
+    "en": "UDS",
+    "cn": "统一诊断服务",
+    "cat": "automotive-protocols",
+    "def": "ISO 14229标准，用于ECU诊断和刷写",
+    "ex": "Send UDS service 0x22 to read DID.",
+    "diff": 2
+  },
+  {
+    "id": "ap006",
+    "en": "OBD",
+    "cn": "车载诊断",
+    "cat": "automotive-protocols",
+    "def": "标准化排放相关故障检测和报告系统",
+    "ex": "Read DTCs via OBD-II port.",
+    "diff": 1
+  },
+  {
+    "id": "ap007",
+    "en": "DTC",
+    "cn": "诊断故障码",
+    "cat": "automotive-protocols",
+    "def": "标识特定故障的代码，如P0xxx",
+    "ex": "DTC P0301 indicates cylinder 1 misfire.",
+    "diff": 1
+  },
+  {
+    "id": "ap008",
+    "en": "ECU",
+    "cn": "电子控制单元",
+    "cat": "automotive-protocols",
+    "def": "控制车辆某一子系统的嵌入式计算机",
+    "ex": "The BCM is an ECU for body functions.",
+    "diff": 1
+  },
+  {
+    "id": "ap009",
+    "en": "OTA",
+    "cn": "空中下载",
+    "cat": "automotive-protocols",
+    "def": "通过无线网络远程更新车辆固件",
+    "ex": "OTA update requires secure boot verification.",
+    "diff": 1
+  },
+  {
+    "id": "ap010",
+    "en": "DoIP",
+    "cn": "基于IP的诊断",
+    "cat": "automotive-protocols",
+    "def": "通过以太网进行车载诊断的ISO 13400标准",
+    "ex": "DoIP uses TCP port 13400 for diagnostics.",
+    "diff": 2
+  },
+  {
+    "id": "ap011",
+    "en": "SOME/IP",
+    "cn": "基于IP的可扩展服务中间件",
+    "cat": "automotive-protocols",
+    "def": "AUTOSAR定义的车载以太网服务发现与通信协议",
+    "ex": "SOME/IP-SD handles service discovery.",
+    "diff": 3
+  },
+  {
+    "id": "hi001",
+    "en": "SPI",
+    "cn": "串行外设接口",
+    "cat": "hardware-interface",
+    "def": "四线全双工高速串行通信协议",
+    "ex": "HAL_SPI_Transmit(&hspi1, tx_buf, len, 100);",
+    "diff": 1
+  },
+  {
+    "id": "hi002",
+    "en": "I2C",
+    "cn": "集成电路总线",
+    "cat": "hardware-interface",
+    "def": "两线式半双工串行总线，支持多设备",
+    "ex": "HAL_I2C_Mem_Read(&hi2c1, addr, reg, 1, buf, 1, 100);",
+    "diff": 1
+  },
+  {
+    "id": "hi003",
+    "en": "UART",
+    "cn": "通用异步收发器",
+    "cat": "hardware-interface",
+    "def": "全双工异步串行通信接口",
+    "ex": "HAL_UART_Transmit(&huart1, \"OK\\r\\n\", 4, 100);",
+    "diff": 1
+  },
+  {
+    "id": "hi004",
+    "en": "JTAG",
+    "cn": "联合测试工作组接口",
+    "cat": "hardware-interface",
+    "def": "用于调试和编程的硬件接口标准",
+    "ex": "Connect J-Link to JTAG for debugging.",
+    "diff": 2
+  },
+  {
+    "id": "hi005",
+    "en": "SWD",
+    "cn": "串行线调试",
+    "cat": "hardware-interface",
+    "def": "ARM Cortex的2线调试接口，替代JTAG",
+    "ex": "SWD uses SWCLK and SWDIO pins.",
+    "diff": 2
+  },
+  {
+    "id": "hi006",
+    "en": "pin",
+    "cn": "引脚",
+    "cat": "hardware-interface",
+    "def": "芯片上与外部电路连接的物理端子",
+    "ex": "PA0 pin is multiplexed as ADC_IN0.",
+    "diff": 1
+  },
+  {
+    "id": "hi007",
+    "en": "bus",
+    "cn": "总线",
+    "cat": "hardware-interface",
+    "def": "多个设备共享的数据传输通道",
+    "ex": "The APB bus runs at half of HCLK.",
+    "diff": 1
+  },
+  {
+    "id": "hi008",
+    "en": "baud rate",
+    "cn": "波特率",
+    "cat": "hardware-interface",
+    "def": "串行通信每秒传输的符号数",
+    "ex": "UART configured at 115200 baud.",
+    "diff": 1
+  },
   {
     "id": "pb001",
     "en": "variable",
     "cn": "变量",
     "cat": "programming-basics",
-    "def": "程序中用于存储数据的命名存储位置",
-    "ex": "int counter = 0;",
+    "def": "程序运行时存储数据的命名位置",
+    "ex": "uint32_t counter = 0;",
     "diff": 1
   },
   {
@@ -15,8 +322,8 @@ window.__EST_EXTERNAL_VOCAB__ = [
     "en": "constant",
     "cn": "常量",
     "cat": "programming-basics",
-    "def": "值在程序执行期间不可改变的量",
-    "ex": "const int MAX = 100;",
+    "def": "编译时确定且不可修改的值",
+    "ex": "#define MAX_SPEED 120",
     "diff": 1
   },
   {
@@ -25,7 +332,7 @@ window.__EST_EXTERNAL_VOCAB__ = [
     "cn": "函数",
     "cat": "programming-basics",
     "def": "执行特定任务的可重用代码块",
-    "ex": "void setup() { }",
+    "ex": "void HAL_GPIO_TogglePin(GPIO_TypeDef*, uint16_t);",
     "diff": 1
   },
   {
@@ -33,260 +340,413 @@ window.__EST_EXTERNAL_VOCAB__ = [
     "en": "parameter",
     "cn": "参数",
     "cat": "programming-basics",
-    "def": "传递给函数的值",
-    "ex": "void delay(int ms)",
+    "def": "传递给函数的值或引用",
+    "ex": "void delay_ms(uint32_t ms)",
     "diff": 1
   },
   {
     "id": "pb005",
-    "en": "return",
-    "cn": "返回",
+    "en": "pointer",
+    "cn": "指针",
     "cat": "programming-basics",
-    "def": "函数执行完毕后回传值给调用者",
-    "ex": "return 0;",
-    "diff": 1
+    "def": "存储内存地址的变量",
+    "ex": "volatile uint32_t *reg = &TIM2->CNT;",
+    "diff": 2
   },
   {
     "id": "pb006",
-    "en": "loop",
-    "cn": "循环",
+    "en": "bitwise",
+    "cn": "按位操作",
     "cat": "programming-basics",
-    "def": "重复执行一段代码直到条件不满足",
-    "ex": "while(1){ }",
+    "def": "直接对二进制位进行与/或/异或/移位操作",
+    "ex": "PORT |= (1<<3);  // set bit 3",
     "diff": 1
   },
   {
     "id": "pb007",
-    "en": "condition",
-    "cn": "条件",
+    "en": "volatile",
+    "cn": "易变的",
     "cat": "programming-basics",
-    "def": "决定程序分支执行的判断表达式",
-    "ex": "if(x > 0)",
-    "diff": 1
-  },
-  {
-    "id": "pb008",
-    "en": "statement",
-    "cn": "语句",
-    "cat": "programming-basics",
-    "def": "程序中的一条完整指令",
-    "ex": "x = x + 1;",
-    "diff": 1
-  },
-  {
-    "id": "pb009",
-    "en": "expression",
-    "cn": "表达式",
-    "cat": "programming-basics",
-    "def": "可求值产生结果的一段代码",
-    "ex": "a + b * c",
+    "def": "告诉编译器变量可能被硬件或中断修改，禁止优化",
+    "ex": "volatile uint32_t flag;",
     "diff": 2
   },
   {
-    "id": "pb010",
-    "en": "operator",
-    "cn": "运算符",
+    "id": "pb008",
+    "en": "static",
+    "cn": "静态",
     "cat": "programming-basics",
-    "def": "执行数学或逻辑操作的符号",
-    "ex": "+ - * / & |",
+    "def": "变量生命周期持续整个程序或限制作用域",
+    "ex": "static uint8_t count = 0;",
+    "diff": 2
+  },
+  {
+    "id": "pb009",
+    "en": "macro",
+    "cn": "宏",
+    "cat": "programming-basics",
+    "def": "预处理器定义的文本替换指令",
+    "ex": "#define BIT(n) (1UL<<(n))",
     "diff": 1
   },
   {
-    "id": "pb011",
-    "en": "assignment",
-    "cn": "赋值",
+    "id": "pb010",
+    "en": "callback",
+    "cn": "回调函数",
     "cat": "programming-basics",
-    "def": "将值存储到变量中的操作",
-    "ex": "x = 10;",
+    "def": "通过函数指针注册、事件发生时调用的函数",
+    "ex": "HAL_TIM_PeriodElapsedCallback(htim);",
+    "diff": 2
+  },
+  {
+    "id": "pb011",
+    "en": "enum",
+    "cn": "枚举",
+    "cat": "programming-basics",
+    "def": "为一组相关常量定义有意义名称的类型",
+    "ex": "typedef enum {RESET, SET} FlagStatus;",
     "diff": 1
   },
   {
     "id": "pb012",
-    "en": "declaration",
-    "cn": "声明",
+    "en": "struct",
+    "cn": "结构体",
     "cat": "programming-basics",
-    "def": "告诉编译器变量或函数的名称和类型",
-    "ex": "extern int count;",
-    "diff": 2
+    "def": "将不同类型数据组合成一个整体",
+    "ex": "GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;",
+    "diff": 1
   },
   {
     "id": "pb013",
-    "en": "definition",
-    "cn": "定义",
+    "en": "loop",
+    "cn": "循环",
     "cat": "programming-basics",
-    "def": "为变量分配内存或为函数提供实现",
-    "ex": "int count = 0;",
-    "diff": 2
+    "def": "重复执行代码直到条件不满足",
+    "ex": "for(int i=0; i<8; i++){ }",
+    "diff": 1
   },
   {
     "id": "pb014",
-    "en": "initialization",
-    "cn": "初始化",
+    "en": "condition",
+    "cn": "条件判断",
     "cat": "programming-basics",
-    "def": "在声明变量时赋予初始值",
-    "ex": "int x = 0;",
-    "diff": 2
+    "def": "根据布尔表达式决定分支执行路径",
+    "ex": "if(sensor_val > threshold)",
+    "diff": 1
   },
   {
     "id": "pb015",
-    "en": "scope",
-    "cn": "作用域",
+    "en": "operator",
+    "cn": "运算符",
     "cat": "programming-basics",
-    "def": "变量在程序中可被访问的范围",
-    "ex": "{ int local; }",
+    "def": "执行数学或逻辑操作的符号",
+    "ex": "result = (a & 0x0F) | (b << 4);",
+    "diff": 1
+  },
+  {
+    "id": "ms001",
+    "en": "flash",
+    "cn": "闪存",
+    "cat": "memory-storage",
+    "def": "可电擦除的非易失性存储器",
+    "ex": "Bank1 starts at 0x08000000.",
+    "diff": 1
+  },
+  {
+    "id": "ms002",
+    "en": "EEPROM",
+    "cn": "电可擦除可编程只读存储器",
+    "cat": "memory-storage",
+    "def": "可按字节擦写的非易失性存储",
+    "ex": "Save calibration data to EEPROM.",
+    "diff": 1
+  },
+  {
+    "id": "ms003",
+    "en": "RAM",
+    "cn": "随机存取存储器",
+    "cat": "memory-storage",
+    "def": "断电后数据丢失的高速临时存储",
+    "ex": "Stack is allocated in RAM.",
+    "diff": 1
+  },
+  {
+    "id": "ms004",
+    "en": "buffer",
+    "cn": "缓冲区",
+    "cat": "memory-storage",
+    "def": "临时存储数据的内存区域",
+    "ex": "uint8_t rx_buffer[256];",
+    "diff": 1
+  },
+  {
+    "id": "ms005",
+    "en": "stack",
+    "cn": "栈",
+    "cat": "memory-storage",
+    "def": "后进先出的内存区域，存储局部变量和返回地址",
+    "ex": "Stack overflow causes HardFault.",
     "diff": 2
   },
   {
-    "id": "pb016",
-    "en": "comment",
-    "cn": "注释",
-    "cat": "programming-basics",
-    "def": "代码中不被编译器执行的说明文字",
-    "ex": "// this is a comment",
-    "diff": 1
-  },
-  {
-    "id": "pb017",
-    "en": "keyword",
-    "cn": "关键字",
-    "cat": "programming-basics",
-    "def": "编程语言中具有特殊含义的保留字",
-    "ex": "int, if, for, while",
-    "diff": 1
-  },
-  {
-    "id": "pb018",
-    "en": "syntax",
-    "cn": "语法",
-    "cat": "programming-basics",
-    "def": "编程语言的书写规则和结构",
-    "ex": "",
-    "diff": 1
-  },
-  {
-    "id": "pb019",
-    "en": "algorithm",
-    "cn": "算法",
-    "cat": "programming-basics",
-    "def": "解决特定问题的步骤序列",
-    "ex": "",
+    "id": "ms006",
+    "en": "heap",
+    "cn": "堆",
+    "cat": "memory-storage",
+    "def": "动态分配的内存区域",
+    "ex": "Use malloc() cautiously in embedded.",
     "diff": 2
   },
   {
-    "id": "pb020",
-    "en": "logic",
-    "cn": "逻辑",
-    "cat": "programming-basics",
-    "def": "程序中条件判断和控制的推理过程",
-    "ex": "if(a && b)",
-    "diff": 2
-  },
-  {
-    "id": "pb021",
-    "en": "input",
-    "cn": "输入",
-    "cat": "programming-basics",
-    "def": "程序从外部接收数据",
-    "ex": "scanf()",
+    "id": "ms007",
+    "en": "integer",
+    "cn": "整数",
+    "cat": "memory-storage",
+    "def": "不带小数的数值类型，嵌入式常用uint8_t/uint16_t/uint32_t",
+    "ex": "int16_t temperature = -40;",
     "diff": 1
   },
   {
-    "id": "pb022",
-    "en": "output",
-    "cn": "输出",
-    "cat": "programming-basics",
-    "def": "程序向外部发送数据",
-    "ex": "printf()",
+    "id": "ms008",
+    "en": "float",
+    "cn": "浮点数",
+    "cat": "memory-storage",
+    "def": "带小数部分的数值类型",
+    "ex": "float voltage = ADC_val * 3.3f / 4095;",
     "diff": 1
   },
   {
-    "id": "pb023",
-    "en": "error",
-    "cn": "错误",
-    "cat": "programming-basics",
-    "def": "程序执行中出现的异常情况",
-    "ex": "",
+    "id": "ms009",
+    "en": "char",
+    "cn": "字符",
+    "cat": "memory-storage",
+    "def": "存储单个ASCII字符的8位数据",
+    "ex": "char cmd = 'R';",
     "diff": 1
   },
   {
-    "id": "pb024",
-    "en": "exception",
-    "cn": "异常",
-    "cat": "programming-basics",
-    "def": "程序运行时的非正常事件",
-    "ex": "",
-    "diff": 2
-  },
-  {
-    "id": "pb025",
-    "en": "library",
-    "cn": "库",
-    "cat": "programming-basics",
-    "def": "预先编写好的可重用代码集合",
-    "ex": "#include <stdio.h>",
-    "diff": 2
+    "id": "ms010",
+    "en": "array",
+    "cn": "数组",
+    "cat": "memory-storage",
+    "def": "相同类型元素的连续存储",
+    "ex": "uint8_t can_data[8];",
+    "diff": 1
   },
   {
     "id": "dt001",
-    "en": "integer",
-    "cn": "整数",
-    "cat": "data-types",
-    "def": "不带小数部分的数值类型",
-    "ex": "int count = 5;",
+    "en": "debugger",
+    "cn": "调试器",
+    "cat": "debug-test",
+    "def": "通过硬件接口单步执行代码并监控变量的工具",
+    "ex": "Set a breakpoint in Keil debugger.",
     "diff": 1
   },
   {
     "id": "dt002",
-    "en": "float",
-    "cn": "浮点数",
-    "cat": "data-types",
-    "def": "带小数部分的数值类型",
-    "ex": "float voltage = 3.3;",
+    "en": "compiler",
+    "cn": "编译器",
+    "cat": "debug-test",
+    "def": "将高级语言代码转为机器码的工具",
+    "ex": "ARMCC compiles C code for Cortex-M.",
     "diff": 1
   },
   {
     "id": "dt003",
-    "en": "double",
-    "cn": "双精度浮点数",
-    "cat": "data-types",
-    "def": "比float精度更高的浮点数类型",
-    "ex": "double pi = 3.1415926535;",
-    "diff": 2
+    "en": "breakpoint",
+    "cn": "断点",
+    "cat": "debug-test",
+    "def": "程序暂停执行的代码位置",
+    "ex": "Set a breakpoint at line 120.",
+    "diff": 1
   },
   {
     "id": "dt004",
-    "en": "char",
-    "cn": "字符",
-    "cat": "data-types",
-    "def": "存储单个字符的数据类型",
-    "ex": "char c = 'A';",
-    "diff": 1
+    "en": "HIL",
+    "cn": "硬件在环",
+    "cat": "debug-test",
+    "def": "通过仿真器模拟真实环境验证ECU",
+    "ex": "HIL testing validates ECU behavior.",
+    "diff": 2
   },
   {
     "id": "dt005",
-    "en": "string",
-    "cn": "字符串",
-    "cat": "data-types",
-    "def": "由多个字符组成的文本序列",
-    "ex": "char msg[] = \\",
-    "diff": 1
+    "en": "calibration",
+    "cn": "标定",
+    "cat": "debug-test",
+    "def": "调整ECU参数使其匹配实际硬件特性",
+    "ex": "MAP sensor needs calibration.",
+    "diff": 2
   },
   {
     "id": "dt006",
-    "en": "boolean",
-    "cn": "布尔值",
-    "cat": "data-types",
-    "def": "只有真(true)或假(false)两种值",
-    "ex": "bool flag = true;",
+    "en": "logic analyzer",
+    "cn": "逻辑分析仪",
+    "cat": "debug-test",
+    "def": "捕获并分析多路数字信号时序的工具",
+    "ex": "Capture SPI signals with logic analyzer.",
+    "diff": 2
+  },
+  {
+    "id": "fs001",
+    "en": "ISO 26262",
+    "cn": "ISO 26262",
+    "cat": "automotive-safety",
+    "def": "汽车功能安全国际标准",
+    "ex": "Compliance with ISO 26262 ASIL-B is required.",
+    "diff": 3
+  },
+  {
+    "id": "fs002",
+    "en": "ASIL",
+    "cn": "汽车安全完整性等级",
+    "cat": "automotive-safety",
+    "def": "ISO 26262定义的风险等级(A–D)",
+    "ex": "Steering system requires ASIL-D.",
+    "diff": 2
+  },
+  {
+    "id": "fs003",
+    "en": "redundancy",
+    "cn": "冗余",
+    "cat": "automotive-safety",
+    "def": "通过备份组件提高系统可靠性",
+    "ex": "Dual-core lockstep provides redundancy.",
+    "diff": 2
+  },
+  {
+    "id": "fs004",
+    "en": "EMC",
+    "cn": "电磁兼容",
+    "cat": "automotive-safety",
+    "def": "设备在电磁环境中正常工作的能力",
+    "ex": "Pass EMC test before production.",
+    "diff": 2
+  },
+  {
+    "id": "fs005",
+    "en": "fault tolerance",
+    "cn": "容错",
+    "cat": "automotive-safety",
+    "def": "系统在部分故障下仍能安全运行的能力",
+    "ex": "CAN has built-in fault tolerance.",
+    "diff": 2
+  },
+  {
+    "id": "cm001",
+    "en": "frame",
+    "cn": "帧",
+    "cat": "communication",
+    "def": "通信协议中数据的最小传输单元",
+    "ex": "CAN data frame carries up to 8 bytes.",
     "diff": 1
   },
   {
-    "id": "dt007",
-    "en": "array",
-    "cn": "数组",
-    "cat": "data-types",
-    "def": "相同类型元素的连续存储集合",
-    "ex": "",
+    "id": "cm002",
+    "en": "checksum",
+    "cn": "校验和",
+    "cat": "communication",
+    "def": "用于检测数据传输错误的累加验证值",
+    "ex": "Verify the checksum before processing.",
     "diff": 1
+  },
+  {
+    "id": "cm003",
+    "en": "CRC",
+    "cn": "循环冗余校验",
+    "cat": "communication",
+    "def": "基于多项式除法的误码检测算法",
+    "ex": "CRC-32 is used in flash integrity check.",
+    "diff": 2
+  },
+  {
+    "id": "cm004",
+    "en": "acknowledge",
+    "cn": "应答",
+    "cat": "communication",
+    "def": "接收方确认收到数据或命令的回复信号",
+    "ex": "Slave sends ACK after receiving data.",
+    "diff": 1
+  },
+  {
+    "id": "cm005",
+    "en": "signal",
+    "cn": "信号",
+    "cat": "communication",
+    "def": "通信总线上的物理或逻辑电平变化",
+    "ex": "CAN signal is differential on CAN_H/CAN_L.",
+    "diff": 1
+  },
+  {
+    "id": "rt001",
+    "en": "RTOS",
+    "cn": "实时操作系统",
+    "cat": "rtos",
+    "def": "保证任务在确定时间内响应的操作系统",
+    "ex": "FreeRTOS is widely used in automotive.",
+    "diff": 2
+  },
+  {
+    "id": "rt002",
+    "en": "scheduler",
+    "cn": "调度器",
+    "cat": "rtos",
+    "def": "决定哪个任务运行的算法",
+    "ex": "Preemptive scheduler switches tasks.",
+    "diff": 2
+  },
+  {
+    "id": "rt003",
+    "en": "semaphore",
+    "cn": "信号量",
+    "cat": "rtos",
+    "def": "用于任务同步和资源保护的计数器",
+    "ex": "xSemaphoreGive(bin_sem);",
+    "diff": 2
+  },
+  {
+    "id": "rt004",
+    "en": "mutex",
+    "cn": "互斥锁",
+    "cat": "rtos",
+    "def": "防止多个任务同时访问共享资源的锁",
+    "ex": "xSemaphoreTake(mutex, portMAX_DELAY);",
+    "diff": 2
+  },
+  {
+    "id": "rt005",
+    "en": "task",
+    "cn": "任务",
+    "cat": "rtos",
+    "def": "操作系统中独立调度的执行单元",
+    "ex": "xTaskCreate(vTask, \"Task1\", 256, NULL, 1, NULL);",
+    "diff": 1
+  },
+  {
+    "id": "rt006",
+    "en": "ISR",
+    "cn": "中断服务程序",
+    "cat": "rtos",
+    "def": "响应硬件中断而执行的函数",
+    "ex": "Keep ISR as short as possible.",
+    "diff": 2
+  },
+  {
+    "id": "rt007",
+    "en": "deadline",
+    "cn": "截止时间",
+    "cat": "rtos",
+    "def": "实时任务必须完成的时间点",
+    "ex": "Control loop must meet 1ms deadline.",
+    "diff": 2
+  },
+  {
+    "id": "rt008",
+    "en": "latency",
+    "cn": "延迟",
+    "cat": "rtos",
+    "def": "从事件发生到系统响应的时间间隔",
+    "ex": "Interrupt latency is critical in safety systems.",
+    "diff": 2
   }
 ];
