@@ -444,6 +444,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   </div>
 </div>
 
+<script src="data/vocabulary.js"></script>
 <script>
 /* ============================================================
    EST Namespace
@@ -794,11 +795,24 @@ EST.data.CATEGORIES = [
 ];
 
 EST.data.initVocab = () => {
-  let vocab = EST.data.loadVocab();
+  let vocab = null;
+  // 1. 优先从外部词库文件加载 (data/vocabulary.js)
+  if(window.__EST_EXTERNAL_VOCAB__ && window.__EST_EXTERNAL_VOCAB__.length > 0){
+    vocab = window.__EST_EXTERNAL_VOCAB__;
+    console.log(`[EST] 从 data/vocabulary.js 加载了 ${vocab.length} 个词条`);
+  }
+  // 2. 回退到 localStorage
+  if(!vocab || vocab.length===0){
+    vocab = EST.data.loadVocab();
+    if(vocab && vocab.length>0) console.log(`[EST] 从 localStorage 加载了 ${vocab.length} 个词条`);
+  }
+  // 3. 最后回退到内置词库
   if(!vocab || vocab.length===0){
     vocab = EST.data.BUILTIN_VOCAB;
-    EST.data.saveVocab(vocab);
+    console.log(`[EST] 从内置词库加载了 ${vocab.length} 个词条`);
   }
+  // 同步到 localStorage，确保运行时存储一致
+  EST.data.saveVocab(vocab);
   // Initialize state for any words without it
   const state = EST.data.loadState();
   let updated = false;

@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "active_work_id": "english-study-fix-2a6e7a38",
+  "works": {
+    "english-study-fix-2a6e7a38": {
+      "work_id": "english-study-fix-2a6e7a38",
+      "active_plan": "D:\\Users\\18065\\Desktop\\ming\\English-study-tool\\.sisyphus\\plans\\english-study-fix.md",
+      "plan_name": "english-study-fix",
+      "status": "completed",
+      "started_at": "2026-05-25T00:57:40.346Z",
+      "updated_at": "2026-05-25T01:33:48.503Z",
+      "session_ids": [
+        "ses_1a367e2caffezbdn3M2EWyRCBZ"
+      ],
+      "session_origins": {
+        "ses_1a367e2caffezbdn3M2EWyRCBZ": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {},
+      "ended_at": "2026-05-25T01:33:48.500Z",
+      "elapsed_ms": 2168154
+    }
+  },
+  "active_plan": "D:\\Users\\18065\\Desktop\\ming\\English-study-tool\\.sisyphus\\plans\\english-study-fix.md",
+  "started_at": "2026-05-25T00:57:40.346Z",
+  "status": "completed",
+  "updated_at": "2026-05-25T01:33:48.503Z",
+  "session_ids": [
+    "ses_1a367e2caffezbdn3M2EWyRCBZ"
+  ],
+  "session_origins": {
+    "ses_1a367e2caffezbdn3M2EWyRCBZ": "direct"
+  },
+  "plan_name": "english-study-fix",
+  "task_sessions": {},
+  "agent": "atlas",
+  "ended_at": "2026-05-25T01:33:48.500Z",
+  "elapsed_ms": 2168154
+}
