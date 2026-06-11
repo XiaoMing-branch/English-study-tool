@@ -438,7 +438,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-outline" id="btn-settings-close">关闭</button>
+      <button class="btn btn-ghost" id="btn-settings-cancel">取消</button>
+      <button class="btn btn-primary" id="btn-settings-close">保存</button>
     </div>
   </div>
 </div>
@@ -630,7 +631,6 @@ EST.data.BUILTIN_VOCAB = [
   {id:"fm017",en:"stack",cn:"栈",cat:"functions-modules",def:"函数调用时用于存储局部变量的内存区域",ex:"",diff:2},
   {id:"fm018",en:"frame",cn:"栈帧",cat:"functions-modules",def:"每次函数调用在栈上分配的内存块",ex:"",diff:3},
   {id:"fm019",en:"invoke",cn:"调用",cat:"functions-modules",def:"执行一个函数",ex:"",diff:1},
-  {id:"fm020",en:"callback",cn:"回调",cat:"functions-modules",def:"事件发生时被调用的函数",ex:"",diff:3},
 
   // ── 内存管理 (memory-management) ──
   {id:"mm001",en:"memory",cn:"内存",cat:"memory-management",def:"计算机中用于存储程序和数据的硬件",ex:"",diff:1},
@@ -912,7 +912,7 @@ EST.srs._recordDailyActivity = (correct) => {
   const today = EST.utils.todayStr();
   const daily = EST.data.loadDaily();
   if(!daily[today]){
-    daily[today] = {wordsReviewed:0,wordsLearned:0,correctRate:0,timeSpentMinutes:0,longestStreak:0};
+    daily[today] = {wordsReviewed:0,wordsLearned:0,correctRate:0,timeSpentMinutes:0};
   }
   const d = daily[today];
   d.wordsReviewed++;
@@ -1067,6 +1067,28 @@ EST.ui.refreshStats = () => {
       html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem">
         <span>${k}</span>
         <span style="color:var(--text-secondary)">复习${d.wordsReviewed}词 · 正确率${Math.round(d.correctRate*100)}%</span>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // 掌握率趋势图（过去14天）
+  const trendKeys = Object.keys(daily).sort().slice(-14);
+  if(trendKeys.length > 1){
+    const trendData = trendKeys.map(k => ({
+      date: k,
+      rate: Math.round((daily[k].correctRate || 0) * 100)
+    }));
+    const maxRate = 100;
+    html += '<div class="card" style="margin-bottom:var(--space-lg)"><div class="card-header">掌握率趋势（近14天）</div>';
+    html += '<div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding:var(--space-md) 0">';
+    trendData.forEach(d => {
+      const h = Math.max(4, (d.rate / maxRate) * 120);
+      const color = d.rate >= 80 ? 'var(--success)' : d.rate >= 50 ? 'var(--warning)' : 'var(--danger)';
+      html += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;min-width:0" title="${d.date}: ${d.rate}%">
+        <span style="font-size:.65rem;color:var(--text-secondary);margin-bottom:2px">${d.rate}%</span>
+        <div style="width:100%;max-width:28px;height:${h}px;background:${color};border-radius:3px 3px 0 0;transition:height .3s"></div>
+        <span style="font-size:.55rem;color:var(--text-muted);margin-top:4px;writing-mode:vertical-lr;text-orientation:mixed">${d.date.slice(5)}</span>
       </div>`;
     });
     html += '</div></div>';
@@ -1227,7 +1249,8 @@ EST.modes.flashcard = {
       </div>`;
 
     // Flip on card click
-    document.getElementById('flashcard-el').addEventListener('click',()=>this.flip());
+    const fcEl = document.getElementById('flashcard-el');
+    if(fcEl) fcEl.addEventListener('click', ()=>this.flip());
 
     // Rating buttons
     container.querySelectorAll('.rating-btn').forEach(btn=>{
@@ -1239,11 +1262,14 @@ EST.modes.flashcard = {
     });
 
     // Hint button
-    document.getElementById('fc-hint-btn').addEventListener('click',()=>this.showHint(word));
+    const hintBtn = document.getElementById('fc-hint-btn');
+    if(hintBtn) hintBtn.addEventListener('click', ()=>this.showHint(word));
     // Speak button
-    document.getElementById('fc-speak-btn').addEventListener('click',()=>this.speak(word.en));
+    const speakBtn = document.getElementById('fc-speak-btn');
+    if(speakBtn) speakBtn.addEventListener('click', ()=>this.speak(word.en));
     // Skip button
-    document.getElementById('fc-skip-btn').addEventListener('click',()=>this.skip());
+    const skipBtn = document.getElementById('fc-skip-btn');
+    if(skipBtn) skipBtn.addEventListener('click', ()=>this.skip());
   },
 
   flip: function(){
@@ -1345,14 +1371,18 @@ EST.modes.spelling = {
       </div>`;
 
     const input = document.getElementById('spell-input');
-    input.focus();
-    input.addEventListener('keydown',(e)=>{ if(e.key==='Enter') this.check(); });
-    document.getElementById('spell-submit').addEventListener('click',()=>this.check());
-    document.getElementById('spell-hint-btn').addEventListener('click',()=>{
-      input.value = word.en[0];
+    if(input){
       input.focus();
+      input.addEventListener('keydown',(e)=>{ if(e.key==='Enter') this.check(); });
+    }
+    const submitBtn = document.getElementById('spell-submit');
+    if(submitBtn) submitBtn.addEventListener('click', ()=>this.check());
+    const hintBtn = document.getElementById('spell-hint-btn');
+    if(hintBtn) hintBtn.addEventListener('click', ()=>{
+      if(input) { input.value = word.en[0]; input.focus(); }
     });
-    document.getElementById('spell-skip').addEventListener('click',()=>this.skip());
+    const skipBtn = document.getElementById('spell-skip');
+    if(skipBtn) skipBtn.addEventListener('click', ()=>this.skip());
   },
 
   check: function(){
@@ -1438,8 +1468,17 @@ EST.modes.quiz = {
   generateQuestion: function(word, pool, type){
     if(type==='choice-cn'){
       // Show English, pick Chinese from 4 options
-      const distractors = pool.filter(w=>w.id!==word.id).slice(0,3);
-      while(distractors.length<3) distractors.push(pool[0]);
+      const others = pool.filter(w=>w.id!==word.id);
+      const distractors = others.slice(0, 3);
+      // 确保干扰项不包含正确答案本身
+      while(distractors.length < 3){
+        const fallback = others[distractors.length % others.length];
+        if(fallback && fallback.id !== word.id){
+          distractors.push(fallback);
+        } else {
+          break;
+        }
+      }
       const options = EST.utils.shuffle([word,...distractors]);
       return {
         type:'choice-cn', word:word,
@@ -1450,8 +1489,17 @@ EST.modes.quiz = {
       };
     } else if(type==='choice-en'){
       // Show Chinese, pick English from 4 options
-      const distractors = pool.filter(w=>w.id!==word.id).slice(0,3);
-      while(distractors.length<3) distractors.push(pool[0]);
+      const others = pool.filter(w=>w.id!==word.id);
+      const distractors = others.slice(0, 3);
+      // 确保干扰项不包含正确答案本身
+      while(distractors.length < 3){
+        const fallback = others[distractors.length % others.length];
+        if(fallback && fallback.id !== word.id){
+          distractors.push(fallback);
+        } else {
+          break;
+        }
+      }
       const options = EST.utils.shuffle([word,...distractors]);
       return {
         type:'choice-en', word:word,
@@ -1586,7 +1634,7 @@ EST.modes.quiz = {
       html += `<div style="text-align:left;margin-bottom:var(--space-lg)">
         <h4 style="margin-bottom:var(--space-sm)">错题回顾（${this.wrongList.length}题）</h4>`;
       this.wrongList.forEach(q=>{
-        html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem)">
+        html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem;">
           <div>${q.prompt.replace(/<[^>]*>/g,'')}</div>
           <div class="en-word" style="color:var(--danger);margin-top:2px">正确答案：${EST.utils.escapeHtml(q.correctAnswer)}</div>
         </div>`;
@@ -1645,55 +1693,106 @@ EST.ui.saveSettingsFromForm = () => {
 };
 
 EST.ui.exportData = () => {
-  const data = {
-    version: EST.VERSION,
-    vocabulary: EST.data.loadVocab(),
-    state: EST.data.loadState(),
-    settings: EST.data.loadSettings(),
-    daily: EST.data.loadDaily(),
-    exportedAt: EST.utils.getNow()
-  };
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url;
-  a.download=`english-study-backup-${EST.utils.todayStr()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  EST.ui.toast('数据已导出','success');
+  try {
+    const data = {
+      version: EST.VERSION,
+      vocabulary: EST.data.loadVocab(),
+      state: EST.data.loadState(),
+      settings: EST.data.loadSettings(),
+      daily: EST.data.loadDaily(),
+      exportedAt: EST.utils.getNow()
+    };
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], {type: 'application/json'});
+    const filename = `english-study-backup-${EST.utils.todayStr()}.json`;
+
+    // 优先使用 File System Access API（HTTP 服务器下可用）
+    if('showSaveFilePicker' in window){
+      (async () => {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{description: 'JSON Files', accept: {'application/json':['.json']}}]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          EST.ui.toast('数据已导出到选定位置', 'success');
+        } catch(e) {
+          if(e.name !== 'AbortError'){
+            EST.ui.toast('导出失败: ' + e.message, 'error');
+          }
+        }
+      })();
+    } else {
+      // 回退到浏览器下载
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      EST.ui.toast('数据已导出', 'success');
+    }
+  } catch(e) {
+    console.error('Export error:', e);
+    EST.ui.toast('导出失败，请检查数据完整性', 'error');
+  }
 };
 
 EST.ui.importData = () => {
-  const input = document.createElement('input');
-  input.type='file';
-  input.accept='.json';
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try{
-        const data = JSON.parse(ev.target.result);
-        if(!data.vocabulary||!data.state){
-          EST.ui.toast('无效的备份文件','error');
-          return;
-        }
-        EST.data.saveVocab(data.vocabulary);
-        EST.data.saveState(data.state);
-        EST.data.saveSettings(data.settings||EST.data.loadSettings());
-        EST.data.saveDaily(data.daily||{});
-        localStorage.setItem('est_version',String(data.version||EST.VERSION));
-        EST.ui.applyTheme((data.settings||{}).theme||'light');
-        EST.ui.applyFontSize((data.settings||{}).fontSize||'medium');
-        EST.ui.toast('数据导入成功','success');
-        EST.ui.switchView('home');
-      }catch(err){
-        EST.ui.toast('文件解析失败，请检查文件格式','error');
+  const processImport = (jsonText) => {
+    try {
+      const data = JSON.parse(jsonText);
+      if(!data.vocabulary || !data.state){
+        EST.ui.toast('无效的备份文件', 'error');
+        return;
       }
-    };
-    reader.readAsText(file);
+      EST.data.saveVocab(data.vocabulary);
+      EST.data.saveState(data.state);
+      EST.data.saveSettings(data.settings || EST.data.loadSettings());
+      EST.data.saveDaily(data.daily || {});
+      localStorage.setItem('est_version', String(data.version || EST.VERSION));
+      EST.ui.applyTheme((data.settings || {}).theme || 'light');
+      EST.ui.applyFontSize((data.settings || {}).fontSize || 'medium');
+      EST.ui.toast('数据导入成功', 'success');
+      EST.ui.switchView('home');
+    } catch(err) {
+      EST.ui.toast('文件解析失败，请检查文件格式', 'error');
+    }
   };
-  input.click();
+
+  // 优先使用 File System Access API
+  if('showOpenFilePicker' in window){
+    (async () => {
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          types: [{description: 'JSON Files', accept: {'application/json':['.json']}}],
+          multiple: false
+        });
+        const file = await handle.getFile();
+        const text = await file.text();
+        processImport(text);
+      } catch(e) {
+        if(e.name !== 'AbortError'){
+          EST.ui.toast('导入取消或失败', 'error');
+        }
+      }
+    })();
+  } else {
+    // 回退到传统文件选择
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => processImport(ev.target.result);
+      reader.readAsText(file);
+    };
+    input.click();
+  }
 };
 
 EST.ui.resetData = () => {
@@ -1747,11 +1846,16 @@ EST.init = () => {
   document.getElementById('btn-settings-close').addEventListener('click',()=>{
     EST.ui.saveSettingsFromForm();
   });
+  document.getElementById('btn-settings-cancel').addEventListener('click',()=>{
+    document.getElementById('settings-overlay').classList.remove('active');
+    EST.ui.toast('已取消，设置未保存');
+  });
 
-  // Settings overlay close on backdrop click
+  // Settings overlay close on backdrop click — discard changes
   document.getElementById('settings-overlay').addEventListener('click',(e)=>{
     if(e.target===document.getElementById('settings-overlay')){
-      EST.ui.saveSettingsFromForm();
+      document.getElementById('settings-overlay').classList.remove('active');
+      EST.ui.toast('已取消，设置未保存');
     }
   });
 
