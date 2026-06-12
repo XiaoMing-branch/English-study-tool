@@ -8,7 +8,7 @@
 - **依赖**: 零外部依赖（无框架、无 npm 包、无 CDN）
 - **运行方式**: 直接用浏览器打开 `index.html`，或通过任意 HTTP 服务器托管
 - **数据存储**: 全部存储在浏览器 `localStorage` 中，完全离线可用
-- **词库规模**: 内置 225 词嵌入式专业英语词汇，覆盖 10 个技术分类
+- **词库规模**: 内置 83 词嵌入式专业英语词汇，覆盖 9 个技术分类
 
 ---
 
@@ -19,6 +19,8 @@ English-study-tool/
 ├── index.html          # 唯一源文件（内联 CSS + HTML + JS）
 ├── README.md           # 用户使用说明
 ├── data/               # 数据目录（备份文件、迁移数据存放处）
+│   ├── vocabulary.js   # 外部词库文件（83 词，工程启动时加载）
+│   ├── vocabulary.json # 词库 JSON 格式副本
 │   └── README.md       # 数据目录说明
 └── doc/
     └── architecture.md # 本文档（技术架构说明）
@@ -30,7 +32,7 @@ English-study-tool/
 |------|----------|------|
 | CSS | 7–219 | 内联样式表，包含 CSS 变量主题系统、布局、组件样式、响应式设计 |
 | HTML | 220–444 | 静态页面结构（导航栏、6 个视图、设置面板、模态框、Toast） |
-| JavaScript | 446–1842 | 全部应用逻辑（命名空间、数据层、SRS 引擎、UI、学习模式、初始化） |
+| JavaScript | 447–1801 | 全部应用逻辑（命名空间、数据层、SRS 引擎、UI、学习模式、初始化） |
 
 ---
 
@@ -42,8 +44,8 @@ English-study-tool/
 window.EST
 ├── VERSION: 1                    # 数据版本号，用于迁移
 ├── data                          # 数据层 — 词汇管理 + 持久化
-│   ├── BUILTIN_VOCAB             # 内置词库（225 词）
-│   ├── CATEGORIES                # 10 个词库分类定义
+│   ├── BUILTIN_VOCAB             # 内置词库（83 词）
+│   ├── CATEGORIES                # 9 个词库分类定义
 │   ├── _get(key) / _set(key,val) # localStorage 读写封装（含错误处理）
 │   ├── loadVocab() / saveVocab() # 词汇数据存取
 │   ├── loadState() / saveState() # SRS 学习状态存取
@@ -271,23 +273,22 @@ correct = level >= oldState.level + 1 || (level === 4 && oldState.level === 4)
 
 **功能**:
 - **全文搜索**: 搜索英文、中文、定义
-- **分类过滤**: 按 10 个技术分类筛选
+- **分类过滤**: 按 9 个技术分类筛选
 - **等级过滤**: 按 5 级掌握程度筛选
 - **点击查看详情**: 弹出模态框显示完整释义、代码示例、学习统计、下次复习时间
 
 **词库分类**:
 | ID | 名称 | 词数 |
 |----|------|------|
-| `programming-basics` | 编程基础概念 | 25 |
-| `data-types` | 数据类型与变量 | 25 |
-| `control-flow` | 控制流程 | 20 |
-| `functions-modules` | 函数与模块化 | 20 |
-| `memory-management` | 内存管理 | 25 |
-| `embedded-hardware` | 嵌入式硬件 | 30 |
-| `communication-protocols` | 通信协议 | 25 |
-| `rtos` | 实时操作系统 | 20 |
-| `debugging-testing` | 调试与测试 | 20 |
-| `compilation-build` | 编译与构建 | 15 |
+| `embedded-core` | 嵌入式核心 | 15 |
+| `automotive-protocols` | 汽车通信协议 | 11 |
+| `hardware-interface` | 硬件接口 | 8 |
+| `programming-basics` | 编程基础 | 15 |
+| `memory-storage` | 存储与内存 | 10 |
+| `debug-test` | 调试与测试 | 6 |
+| `automotive-safety` | 汽车功能安全 | 5 |
+| `communication` | 通信技术 | 5 |
+| `rtos` | 实时操作系统 | 8 |
 
 ---
 
@@ -369,7 +370,7 @@ correct = level >= oldState.level + 1 || (level === 4 && oldState.level === 4)
 3. 检查数据版本 → 加载设置并应用主题/字号
 4. 调用 `EST.data.initVocab()`：
    - 尝试从 localStorage 加载词汇表
-   - 若不存在（首次运行），从内置 `BUILTIN_VOCAB` 写入 localStorage（225 词）
+   - 若不存在（首次运行），从内置 `BUILTIN_VOCAB` 写入 localStorage（83 词）
    - 为所有词条初始化 SRS 学习状态
 5. 绑定所有 UI 事件监听器（导航、按钮、搜索、键盘）
 6. 刷新首页数据
