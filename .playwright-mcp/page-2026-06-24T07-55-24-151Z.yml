@@ -1,0 +1,93 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "Keykey" [ref=e6]
+        - generic [ref=e11]: keykey.cc
+      - button "折叠侧边栏" [expanded] [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+    - navigation [ref=e15]:
+      - generic [ref=e16]: 导航
+      - link "首页" [ref=e17] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e19]
+        - generic [ref=e22]: 首页
+      - link "单词练习" [ref=e23] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e25]
+        - generic [ref=e27]: 单词练习
+      - link "句子练习" [ref=e28] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e30]
+        - generic [ref=e33]: 句子练习
+      - link "资源中心" [ref=e34] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e36]
+        - generic [ref=e38]: 资源中心
+      - link "复习中心 12" [ref=e39] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e41]
+        - generic [ref=e43]: 复习中心
+        - generic [ref=e44]: "12"
+      - link "发音学习" [ref=e45] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e47]
+        - generic [ref=e51]: 发音学习
+      - link "知识文章" [ref=e52] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e54]:
+          - generic [ref=e56]: A
+        - generic [ref=e57]: 知识文章
+        - img [ref=e59]
+      - generic [ref=e62]: 更多
+      - link "学习统计" [ref=e63] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e65]
+        - generic [ref=e69]: 学习统计
+      - link "个人中心" [ref=e70] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e72]
+        - generic [ref=e75]: 个人中心
+      - link "共建计划" [ref=e76] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e78]
+        - generic [ref=e83]: 共建计划
+    - generic [ref=e84]:
+      - button "切换主题" [ref=e85] [cursor=pointer]:
+        - img [ref=e86]
+      - generic [ref=e92]: 浅色模式
+    - generic [ref=e93]:
+      - img [ref=e94]
+      - generic [ref=e97]:
+        - generic [ref=e98]: 看视频·学语言
+        - generic [ref=e99]: 语境功能 公测启动
+      - button "点此参与" [ref=e100] [cursor=pointer]
+  - main [ref=e101]:
+    - generic [ref=e102]:
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - generic [ref=e105]:
+            - heading "查英语单词" [level=2] [ref=e106]
+            - paragraph [ref=e107]: 词义、音标、例句
+          - button "搜索" [ref=e108] [cursor=pointer]:
+            - img [ref=e109]
+        - generic [ref=e112]:
+          - textbox "search" [ref=e113]
+          - button "查询" [ref=e114] [cursor=pointer]:
+            - img [ref=e115]
+            - text: 查询
+        - generic [ref=e119]: 输入英文词条后查询
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - heading "页面异常处理" [level=3] [ref=e122]
+          - paragraph [ref=e123]: 遇到白屏、旧版本资源或缓存异常时，可先清理本地资源缓存并刷新页面。
+        - generic [ref=e124]:
+          - button "导出数据" [ref=e125] [cursor=pointer]:
+            - img [ref=e126]
+            - text: 导出数据
+          - button "导入数据" [ref=e129] [cursor=pointer]:
+            - img [ref=e130]
+            - text: 导入数据
+          - button "立即修复" [ref=e133] [cursor=pointer]:
+            - img [ref=e134]
+            - text: 立即修复
