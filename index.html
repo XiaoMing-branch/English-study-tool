@@ -1096,13 +1096,10 @@
 <body>
   <div class="app">
 
-    <!-- Edge Trigger — visible when sidebar collapsed -->
-    <div class="edge-trigger" id="edgeTrigger"></div>
-
     <!-- ====================================
          Sidebar
     ==================================== -->
-    <aside class="sidebar collapsed" id="sidebar">
+    <aside class="sidebar" id="sidebar">
       <!-- Header -->
       <div class="sidebar-header">
         <div class="brand">
@@ -1118,20 +1115,7 @@
           </svg>
           <span class="brand-name">keykey.cc</span>
         </div>
-        <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换主题" title="切换主题">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-        </button>
-        <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="折叠侧边栏" aria-expanded="false">
+        <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="折叠侧边栏" aria-expanded="true">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M12 3L6 9L12 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -1275,6 +1259,24 @@
 
       </nav>
 
+      <!-- Sidebar Footer (Theme Toggle) -->
+      <div class="sidebar-footer">
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换主题" title="切换主题">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <span class="theme-toggle-text">浅色模式</span>
+      </div>
+
       <!-- Bottom Promo Card -->
       <div class="sidebar-promo">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1291,9 +1293,6 @@
       </div>
 
     </aside>
-
-    <!-- Sidebar Mask — overlay when sidebar expanded -->
-    <div class="sidebar-mask" id="sidebarMask"></div>
 
     <!-- ====================================
          Main Content Area
@@ -1388,37 +1387,21 @@
     document.addEventListener('DOMContentLoaded', () => {
       const sidebar = document.getElementById('sidebar');
       const toggleBtn = document.getElementById('sidebarToggle');
-      const edgeTrigger = document.getElementById('edgeTrigger');
-      const sidebarMask = document.getElementById('sidebarMask');
-
       function setSidebarCollapsed(collapsed) {
         if (collapsed) {
           sidebar.classList.add('collapsed');
           toggleBtn.setAttribute('aria-expanded', 'false');
-          document.body.style.overflow = '';
+          toggleBtn.setAttribute('aria-label', '展开侧边栏');
         } else {
           sidebar.classList.remove('collapsed');
           toggleBtn.setAttribute('aria-expanded', 'true');
-          document.body.style.overflow = 'hidden';
+          toggleBtn.setAttribute('aria-label', '折叠侧边栏');
         }
       }
 
       toggleBtn.addEventListener('click', () => {
-        setSidebarCollapsed(true);
-      });
-
-      edgeTrigger.addEventListener('click', () => {
-        setSidebarCollapsed(false);
-      });
-
-      sidebarMask.addEventListener('click', () => {
-        setSidebarCollapsed(true);
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !sidebar.classList.contains('collapsed')) {
-          setSidebarCollapsed(true);
-        }
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        setSidebarCollapsed(!isCollapsed);
       });
 
       const navItems = document.querySelectorAll('.nav-item');
