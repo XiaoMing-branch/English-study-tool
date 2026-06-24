@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keykey - 学英语 一个就够</title>
+  <style>
+    /* ========================================
+       Reset & Base
+    ======================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --sidebar-width: 240px;
+      --sidebar-collapsed-width: 0;
+      --color-bg: #f7f5f2;
+      --color-sidebar: #ffffff;
+      --color-card: #ffffff;
+      --color-text-primary: #1a1a1a;
+      --color-text-secondary: #6b6b6b;
+      --color-text-tertiary: #9a9a9a;
+      --color-divider: #eae8e5;
+      --color-hover: #f3f1ef;
+      --color-active: #efedeb;
+      --color-border: #e6e4e0;
+      --color-accent: #2b2b2b;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+      --radius-card: 16px;
+      --radius-nav: 10px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --color-bg: #1a1a1a;
+      --color-sidebar: #222222;
+      --color-card: #2a2a2a;
+      --color-text-primary: #e8e8e8;
+      --color-text-secondary: #aaaaaa;
+      --color-text-tertiary: #777777;
+      --color-divider: #333333;
+      --color-hover: #333333;
+      --color-active: #383838;
+      --color-border: #404040;
+      --color-accent: #e0e0e0;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--color-text-primary);
+      background: var(--color-bg);
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ========================================
+       Layout
+    ======================================== */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ========================================
+       Sidebar
+    ======================================== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-sidebar);
+      border-right: 1px solid var(--color-divider);
+      display: flex;
+      flex-direction: column;
+      z-index: 200;
+      transition: width var(--transition), transform var(--transition);
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed-width);
+    }
+
+    /* ---- Sidebar Header ---- */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 16px 20px 20px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      padding: 6px;
+      border-radius: var(--radius-nav, 8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, color var(--transition);
+    }
+    .theme-toggle:hover {
+      color: var(--color-text-primary);
+      background: var(--color-hover);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+      transition: opacity var(--transition);
+    }
+
+    .sidebar.collapsed .brand-name {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-toggle {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-tertiary);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--color-hover);
+      color: var(--color-text-primary);
+    }
+
+    .sidebar-toggle svg {
+      transition: transform var(--transition);
+    }
+
+    .sidebar.collapsed .sidebar-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    /* ---- Sidebar Navigation ---- */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar-thumb {
+      background: var(--color-divider);
+      border-radius: 10px;
+    }
+
+    .nav-section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 16px 12px 6px;
+      white-space: nowrap;
+      transition: opacity var(--transition);
+    }
+
+    .sidebar.collapsed .nav-section-label {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: var(--radius-nav);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition), color var(--transition);
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: var(--color-hover);
+      color: var(--color-text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--color-active);
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .nav-item .nav-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: currentColor;
+    }
+
+    .nav-item .nav-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav-item .nav-text {
+      transition: opacity var(--transition);
+    }
+
+    .sidebar.collapsed .nav-item .nav-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+
+    .nav-item .nav-badge {
+      margin-left: auto;
+      font-size: 11px;
+      background: var(--color-active);
+      color: var(--color-text-secondary);
+      padding: 1px 7px;
+      border-radius: 10px;
+      transition: opacity var(--transition);
+    }
+
+    .sidebar.collapsed .nav-item .nav-badge {
+      opacity: 0;
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .nav-item .nav-check {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      transition: opacity var(--transition);
+    }
+
+    .sidebar.collapsed .nav-item .nav-check {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+
+    /* ---- Divider ---- */
+    .nav-divider {
+      height: 1px;
+      background: var(--color-divider);
+      margin: 8px 4px;
+      flex-shrink: 0;
+    }
+
+    /* ---- Sidebar Promo Card ---- */
+    .sidebar-promo {
+      margin: auto 12px 16px;
+      padding: 12px;
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-card);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .sidebar.collapsed .sidebar-promo {
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+      max-height: 0;
+      margin: 0 12px;
+      padding: 0 12px;
+    }
+
+    .sidebar-promo svg {
+      flex-shrink: 0;
+      color: var(--color-text-secondary);
+    }
+
+    .sidebar-promo-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-promo-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-promo-subtitle {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-top: 1px;
+    }
+
+    .sidebar-promo-btn {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: inherit;
+      background: var(--color-active);
+      color: var(--color-text-primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .sidebar-promo-btn:hover {
+      background: var(--color-hover);
+    }
+
+    /* ========================================
+       Overlay — Mask & Edge Trigger
+    ======================================== */
+    .sidebar-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 199;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .sidebar:not(.collapsed) ~ .sidebar-mask {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .edge-trigger {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 3px;
+      z-index: 201;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+
+    /* ========================================
+       Main Content
+    ======================================== */
+    .main {
+      flex: 1;
+      min-height: 100vh;
+      padding: 32px 40px;
+    }
+
+    .main-content {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: 28px;
+    }
+
+    /* ---- Cards ---- */
+    .card-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 28px 32px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .card-action {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      padding: 4px 12px;
+      border-radius: 6px;
+      transition: background var(--transition);
+    }
+
+    .card-action:hover {
+      background: var(--color-hover);
+    }
+
+    /* ---- Dashboard Stats ---- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      margin-top: 4px;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 48px;
+      background: var(--color-divider);
+      align-self: center;
+    }
+
+    /* ---- Progress Bar ---- */
+    .progress-section {
+      margin-top: 8px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--color-active);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 65%;
+      background: var(--color-accent);
+      border-radius: 10px;
+      transition: width 0.6s ease;
+    }
+
+    /* ---- Quick Actions ---- */
+    .actions-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-card);
+      color: var(--color-text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition);
+      font-family: inherit;
+    }
+
+    .action-btn:hover {
+      background: var(--color-hover);
+      border-color: #d4d2ce;
+    }
+
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .action-btn.primary {
+      background: var(--color-accent);
+      color: #fff;
+      border-color: var(--color-accent);
+    }
+
+    .action-btn.primary:hover {
+      background: #3d3d3d;
+    }
+
+    /* ---- Recent Activity ---- */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .activity-dot.completed {
+      background: #4a4a4a;
+    }
+
+    .activity-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    /* ========================================
+       Word Lookup Card
+    ======================================== */
+    .search-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 28px 32px;
+    }
+
+    /* ---- Title section ---- */
+    .search-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .search-header-left h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.3;
+    }
+
+    .search-header-left p {
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+      margin-top: 2px;
+    }
+
+    .search-header-btn {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border: none;
+      background: var(--color-active);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      transition: background var(--transition);
+    }
+
+    .search-header-btn:hover {
+      background: #dddcd9;
+    }
+
+    /* ========================================
+       Error Handling Card
+    ======================================== */
+    .error-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .error-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.3;
+    }
+
+    .error-card p {
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+      margin-top: 2px;
+    }
+
+    .error-card-btn {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--color-active);
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .error-card-btn:hover {
+      background: #dddcd9;
+    }
+
+    .error-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ---- Toast Notification ---- */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 12px 24px;
+      z-index: 9999;
+      font-size: 14px;
+      color: var(--color-text-primary);
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    /* ---- Search input ---- */
+    .search-input-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      flex: 1;
+      height: 46px;
+      padding: 0 16px;
+      background: #f2f1ef;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--color-text-primary);
+      outline: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .search-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .search-input:focus {
+      border-color: var(--color-border);
+      background: #fff;
+    }
+
+    .search-submit {
+      flex-shrink: 0;
+      height: 46px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 12px;
+      background: var(--color-accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: inherit;
+      transition: background var(--transition);
+    }
+
+    .search-submit:hover {
+      background: #3d3d3d;
+    }
+
+    .search-submit svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ---- Result area ---- */
+    .search-result {
+      background: #f2f1ef;
+      border-radius: 12px;
+      min-height: 200px;
+      padding: 28px 32px;
+      transition: all var(--transition);
+    }
+
+    .search-result-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      color: var(--color-text-tertiary);
+      font-size: 14px;
+    }
+
+    .search-result-loaded {
+      background: #f2f1ef;
+    }
+
+    /* ---- Two-column layout ---- */
+    .result-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+    }
+
+    /* ---- Left column: Word Info ---- */
+    .word-header {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .word-tag-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .word-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      background: var(--color-active);
+      padding: 2px 10px;
+      border-radius: 5px;
+      line-height: 1.6;
+    }
+
+    .word-copy-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-tertiary);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .word-copy-btn:hover {
+      background: var(--color-hover);
+      color: var(--color-text-primary);
+    }
+
+    .word-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .word-text {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+    }
+
+    .word-phonetic {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      font-weight: 400;
+    }
+
+    .word-speaker {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: var(--color-active);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      transition: background var(--transition);
+    }
+
+    .word-speaker:hover {
+      background: #dddcd9;
+    }
+
+    .word-speaker svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ---- Definitions ---- */
+    .def-section {
+      margin-bottom: 20px;
+    }
+
+    .def-group {
+      margin-bottom: 10px;
+    }
+
+    .def-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .def-pos {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-accent);
+      margin-bottom: 4px;
+    }
+
+    .def-meaning {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      line-height: 1.6;
+    }
+
+    .def-meaning-en {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    /* ---- Collocations ---- */
+    .section-divider {
+      height: 1px;
+      background: var(--color-divider);
+      margin: 16px 0;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 12px;
+    }
+
+    .colloc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .colloc-item {
+      display: flex;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .colloc-en {
+      color: var(--color-text-primary);
+    }
+
+    .colloc-sep {
+      color: var(--color-text-tertiary);
+    }
+
+    .colloc-cn {
+      color: var(--color-text-secondary);
+    }
+
+    /* ---- Vocab tag ---- */
+    .vocab-tag {
+      margin-top: 16px;
+    }
+
+    .vocab-tag span {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #8a7a5a;
+      background: #f2efe8;
+      padding: 2px 10px;
+      border-radius: 5px;
+      line-height: 1.6;
+    }
+
+    /* ---- Word forms ---- */
+    .forms-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-item {
+      display: flex;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .form-key {
+      color: var(--color-text-secondary);
+      min-width: 60px;
+    }
+
+    .form-val {
+      color: var(--color-text-primary);
+    }
+
+    /* ---- Right column: Extended ---- */
+    .synonym-block {
+      margin-bottom: 4px;
+    }
+
+    .synonym-item {
+      margin-bottom: 12px;
+    }
+
+    .synonym-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .synonym-word {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+
+    .synonym-desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ---- Examples ---- */
+    .example-item {
+      margin-bottom: 14px;
+    }
+
+    .example-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .example-en {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      line-height: 1.5;
+      margin-bottom: 2px;
+    }
+
+    .example-cn {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      .result-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .search-card {
+        padding: 20px;
+      }
+      .search-result {
+        padding: 20px;
+      }
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+    @media (max-width: 768px) {
+      .main {
+        padding: 24px 20px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Edge Trigger — visible when sidebar collapsed -->
+    <div class="edge-trigger" id="edgeTrigger"></div>
+
+    <!-- ====================================
+         Sidebar
+    ==================================== -->
+    <aside class="sidebar collapsed" id="sidebar">
+      <!-- Header -->
+      <div class="sidebar-header">
+        <div class="brand">
+          <!-- Polyhedron icon (多面体) -->
+          <svg class="brand-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Keykey">
+            <title>Keykey</title>
+            <path d="M14 2L24 8.5V19.5L14 26L4 19.5V8.5L14 2Z" stroke="#1a1a1a" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M14 2L14 26" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M4 8.5L14 14L24 8.5" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M14 14L14 26" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M4 19.5L14 14" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M24 19.5L14 14" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+          <span class="brand-name">keykey.cc</span>
+        </div>
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换主题" title="切换主题">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="折叠侧边栏" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 3L6 9L12 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+
+        <!-- Main Nav -->
+        <div class="nav-section-label">导航</div>
+
+        <!-- 首页 -->
+        <a class="nav-item active" href="#" data-page="home">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 8L10 2L18 8V17C18 17.6 17.6 18 17 18H3C2.4 18 2 17.6 2 17V8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M7 18V10H13V18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">首页</span>
+        </a>
+
+        <!-- 单词练习 -->
+        <a class="nav-item" href="#" data-page="word-practice">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6 7H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M6 10H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M6 13H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">单词练习</span>
+        </a>
+
+        <!-- 句子练习 -->
+        <a class="nav-item" href="#" data-page="sentence-practice">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 2L13 7H7L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M10 18L7 13H13L10 18Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M4 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">句子练习</span>
+        </a>
+
+        <!-- 资源中心 -->
+        <a class="nav-item" href="#" data-page="resources">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 5C2 3.9 2.9 3 4 3H7.5L9.5 5H16C17.1 5 18 5.9 18 7V15C18 16.1 17.1 17 16 17H4C2.9 17 2 16.1 2 15V5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">资源中心</span>
+        </a>
+
+        <!-- 复习中心 -->
+        <a class="nav-item" href="#" data-page="review">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 3H16C16.6 3 17 3.4 17 4V17L13 14L10 17L7 14L3 17V4C3 3.4 3.4 3 4 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M7 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M7 10H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">复习中心</span>
+          <span class="nav-badge">12</span>
+        </a>
+
+        <!-- 发音学习 -->
+        <a class="nav-item" href="#" data-page="pronunciation">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 4L3 8H1V12H3L8 16V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M12 6C14 7.5 14 12.5 12 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M15 3C18.5 5.5 18.5 14.5 15 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">发音学习</span>
+        </a>
+
+        <!-- 知识文章 -->
+        <a class="nav-item" href="#" data-page="knowledge">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+              <text x="10" y="13" text-anchor="middle" fill="currentColor" font-size="10" font-weight="600" font-family="inherit">A</text>
+            </svg>
+          </span>
+          <span class="nav-text">知识文章</span>
+          <span class="nav-check">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </a>
+
+        <!-- Divider -->
+        <div class="nav-divider"></div>
+
+        <!-- Secondary Nav -->
+        <div class="nav-section-label">更多</div>
+
+        <!-- 学习统计 -->
+        <a class="nav-item" href="#" data-page="statistics">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="12" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="8" y="7" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="14" y="2" width="4" height="16" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </span>
+          <span class="nav-text">学习统计</span>
+        </a>
+
+        <!-- 个人中心 -->
+        <a class="nav-item" href="#" data-page="profile">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="10" cy="6" r="3.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 18C2 14.7 5.6 12 10 12C14.4 12 18 14.7 18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">个人中心</span>
+        </a>
+
+        <!-- 共建计划 -->
+        <a class="nav-item" href="#" data-page="contribute">
+          <span class="nav-icon">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="14" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M1 17C1 14.2 3.7 12 7 12C8.3 12 9.5 12.3 10.5 12.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M13 16C13 13.8 15.1 12 17.7 12C14.1 12 12 13.8 12 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">共建计划</span>
+        </a>
+
+      </nav>
+
+      <!-- Bottom Promo Card -->
+      <div class="sidebar-promo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="4" width="24" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 22V26H20V22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M14 12V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M10 8H18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="sidebar-promo-text">
+          <div class="sidebar-promo-title">看视频·学语言</div>
+          <div class="sidebar-promo-subtitle">语境功能 公测启动</div>
+        </div>
+        <button type="button" class="sidebar-promo-btn">点此参与</button>
+      </div>
+
+    </aside>
+
+    <!-- Sidebar Mask — overlay when sidebar expanded -->
+    <div class="sidebar-mask" id="sidebarMask"></div>
+
+    <!-- ====================================
+         Main Content Area
+    ==================================== -->
+    <main class="main" id="mainContent">
+      <div class="main-content">
+
+        <!-- Word Lookup Card -->
+        <div class="search-card">
+
+          <!-- Title section -->
+          <div class="search-header">
+            <div class="search-header-left">
+              <h2>查英语单词</h2>
+              <p>词义、音标、例句</p>
+            </div>
+            <button type="button" class="search-header-btn" aria-label="搜索">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M11.5 11.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Search input -->
+          <div class="search-input-wrap">
+            <input type="text" class="search-input" id="searchInput" placeholder="search" autocomplete="off">
+            <button type="button" class="search-submit" id="searchSubmit">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M10.5 10.5L14.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              查询
+            </button>
+          </div>
+
+          <!-- Result area -->
+          <div class="search-result" id="searchResult">
+            <div class="search-result-empty">
+              输入英文词条后查询
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Error Handling Card -->
+        <div class="error-card">
+
+          <div>
+            <h3>页面异常处理</h3>
+            <p>遇到白屏、旧版本资源或缓存异常时，可先清理本地资源缓存并刷新页面。</p>
+          </div>
+
+          <div class="error-card-actions">
+            <button type="button" class="error-card-btn" id="exportDataBtn" aria-label="导出数据">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M8 3V11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M5 8L8 11L11 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 13V14H14V13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              导出数据
+            </button>
+            <button type="button" class="error-card-btn" id="importDataBtn" aria-label="导入数据">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M8 11V3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M11 6L8 3L5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 13V14H14V13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              导入数据
+            </button>
+            <button type="button" class="error-card-btn" id="repairBtn" aria-label="立即修复">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 8a6 6 0 0 1 10.47-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M14 8a6 6 0 0 1-10.47 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M12.5 1.5V4.5H9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3.5 14.5V11.5H6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              立即修复
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast" style="display:none;"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sidebar = document.getElementById('sidebar');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const edgeTrigger = document.getElementById('edgeTrigger');
+      const sidebarMask = document.getElementById('sidebarMask');
+
+      function setSidebarCollapsed(collapsed) {
+        if (collapsed) {
+          sidebar.classList.add('collapsed');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        } else {
+          sidebar.classList.remove('collapsed');
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        setSidebarCollapsed(true);
+      });
+
+      edgeTrigger.addEventListener('click', () => {
+        setSidebarCollapsed(false);
+      });
+
+      sidebarMask.addEventListener('click', () => {
+        setSidebarCollapsed(true);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !sidebar.classList.contains('collapsed')) {
+          setSidebarCollapsed(true);
+        }
+      });
+
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          navItems.forEach(n => { n.classList.remove('active'); });
+          item.classList.add('active');
+        });
+      });
+
+      // =====================================
+      // Theme Toggle
+      // =====================================
+      const themeToggle = document.getElementById('themeToggle');
+
+      // Apply saved theme on load
+      const savedTheme = localStorage.getItem('keykey_theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('keykey_theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('keykey_theme', 'dark');
+        }
+        // Rotation animation
+        themeToggle.style.transform = 'rotate(360deg)';
+        setTimeout(() => { themeToggle.style.transform = ''; }, 300);
+      });
+
+      // =====================================
+      // UI refs
+      // =====================================
+      const searchInput = document.getElementById('searchInput');
+      const searchSubmit = document.getElementById('searchSubmit');
+      const searchResult = document.getElementById('searchResult');
+
+      // =====================================
+      // User data export / import
+      // =====================================
+      function listUserDataKeys() {
+        return Object.keys(localStorage).filter(k => k.startsWith('keykey_'));
+      }
+
+      function exportUserData() {
+        const keys = listUserDataKeys();
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          data: {}
+        };
+        keys.forEach(k => { payload.data[k] = localStorage.getItem(k); });
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const now = new Date();
+        const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const a = document.createElement('a');
+        a.download = `user_data/keykey-backup-${date}.json`;
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function importUserData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.style.display = 'none';
+        input.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            let parsed;
+            try {
+              parsed = JSON.parse(evt.target.result);
+            } catch {
+              alert('导入失败：JSON 格式错误');
+              return;
+            }
+            const data = parsed.data;
+            if (!data || typeof data !== 'object') {
+              alert('导入失败：无效的数据格式');
+              return;
+            }
+            if (!confirm('确认导入？将覆盖现有数据')) return;
+            Object.entries(data).forEach(([k, v]) => { localStorage.setItem(k, v); });
+            location.reload();
+          };
+          reader.readAsText(file);
+        });
+        document.body.appendChild(input);
+        input.click();
+        document.body.removeChild(input);
+      }
+
+      // =====================================
+      // OED cache & fetch
+      // =====================================
+      const wordCache = new Map();
+
+      async function fetchWordData(word) {
+        word = word.trim().toLowerCase();
+        word = encodeURIComponent(word);
+
+        if (wordCache.has(word)) {
+          return wordCache.get(word);
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        try {
+          const response = await fetch(
+            `https://cdn.jsdelivr.net/gh/plumsun/open-english-dictionary@master/dictionary/${word}.json`,
+            { signal: controller.signal }
+          );
+
+          if (response.status === 404 || response.status === 403) {
+            return null;
+          }
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          wordCache.set(word, data);
+          return data;
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            throw new Error('网络不可用，请检查网络连接');
+          }
+          throw new Error('网络不可用，请检查网络连接');
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      }
+
+
+
+
+
+      function showError(msg) {
+        searchResult.innerHTML = `<div class="search-result-empty">${msg}</div>`;
+      }
+
+
+
+      // =====================================
+      // OED Result Renderer (replaces rich/basic renderers)
+      // =====================================
+      function renderOEDResult(data) {
+        const pronunciation = data.pronunciation || '';
+
+        // Left column
+        const leftHtml = `
+          <div>
+            <div class="word-header">
+              <div class="word-tag-row">
+                <span class="word-tag">词卡</span>
+                <button type="button" class="word-copy-btn" aria-label="复制" title="复制">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="4" y="4" width="10" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+                    <path d="M12 3V2.5C12 1.7 11.3 1 10.5 1H3.5C2.7 1 2 1.7 2 2.5V10.5C2 11.3 2.7 12 3.5 12H4" stroke="currentColor" stroke-width="1.3"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="word-main">
+                <span class="word-text">${data.word}</span>
+                ${pronunciation ? `<span class="word-phonetic">${pronunciation}</span>` : ''}
+                <button type="button" class="word-speaker" aria-label="发音" title="发音">
+                  <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M6 3L2 6.5H0.5V9.5H2L6 13V3Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                    <path d="M9.5 5.5C11 6.7 11 9.3 9.5 10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    <path d="M12 3.5C14.5 5.5 14.5 10.5 12 12.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="def-section">
+              ${data.definitions.map(d => `
+                <div class="def-group">
+                  <div class="def-pos">${d.pos}</div>
+                  <div class="def-meaning">${d.explanation_cn}</div>
+                  ${d.explanation_en ? `<div class="def-meaning-en">${d.explanation_en}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+
+            ${data.forms && Object.keys(data.forms).length ? `
+              <div class="section-divider"></div>
+              <div class="section-title">词形变化</div>
+              <div class="forms-list">
+                ${Object.entries(data.forms).map(([key, val]) => `
+                  <div class="form-item">
+                    <span class="form-key">${key}</span>
+                    <span class="form-val">${val}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        // Right column
+        const rightHtml = `
+          <div>
+            ${data.comparison && data.comparison.length ? `
+              <div class="section-title">近义辨析</div>
+              <div class="synonym-block">
+                ${data.comparison.map(c => `
+                  <div class="synonym-item">
+                    <div class="synonym-word">${c.word_to_compare}</div>
+                    <div class="synonym-desc">${c.analysis}</div>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="section-divider"></div>
+            ` : ''}
+
+            <div class="section-title">例句</div>
+            <div class="example-list">
+              ${data.definitions.filter(d => d.example_en).map(d => `
+                <div class="example-item">
+                  <div class="example-en">${d.example_en}</div>
+                  ${d.example_cn ? `<div class="example-cn">${d.example_cn}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        searchResult.innerHTML = `
+          <div class="result-layout">
+            <div class="result-left">${leftHtml}</div>
+            <div class="result-right">${rightHtml}</div>
+          </div>
+        `;
+
+        // Copy button
+        const copyBtn = searchResult.querySelector('.word-copy-btn');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            const text = [
+              `${data.word} ${pronunciation}`,
+              '',
+              ...data.definitions.map(d => `${d.pos} ${d.explanation_cn}${d.explanation_en ? ` (${d.explanation_en})` : ''}`),
+              '',
+              ...(data.comparison && data.comparison.length ? ['近义辨析:', ...data.comparison.map(c => `${c.word_to_compare}: ${c.analysis}`)] : []),
+              '',
+              '例句:',
+              ...data.definitions.filter(d => d.example_en).map(d => `${d.example_en} / ${d.example_cn || ''}`)
+            ].join('\n');
+            navigator.clipboard.writeText(text).catch(() => {});
+          });
+        }
+
+        // Speaker
+        const speakerBtn = searchResult.querySelector('.word-speaker');
+        if (speakerBtn) {
+          attachSpeaker(speakerBtn, data.word);
+        }
+      }
+
+      // =====================================
+      // Shared helpers
+      // =====================================
+      function attachSpeaker(btn, word) {
+        if (btn && 'speechSynthesis' in window) {
+          btn.addEventListener('click', () => {
+            const utter = new SpeechSynthesisUtterance(word);
+            utter.lang = 'en-US';
+            utter.rate = 0.85;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+          });
+        }
+      }
+
+      function performSearch(query) {
+        query = query.trim().toLowerCase();
+        if (!query) {
+          searchResult.innerHTML = '<div class="search-result-empty">输入英文词条后查询</div>';
+          return;
+        }
+
+        // Show loading state
+        searchResult.innerHTML = '<div class="search-result-empty">查询中...</div>';
+
+        // Call OED fetch (async)
+        fetchWordData(query)
+          .then(data => {
+            if (data) {
+              renderOEDResult(data);
+            } else {
+              showError(`未找到「${query}」的释义，请尝试其他单词`);
+            }
+          })
+          .catch(err => {
+            showError('网络不可用，请检查网络连接');
+          });
+      }
+
+      // =====================================
+      // Event handlers
+      // =====================================
+      searchSubmit.addEventListener('click', () => {
+        performSearch(searchInput.value);
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          performSearch(searchInput.value);
+        }
+      });
+
+      document.querySelector('.search-header-btn').addEventListener('click', () => {
+        searchInput.focus();
+      });
+
+      // =====================================
+      // Data Management: Export/Import/Repair
+      // =====================================
+      const exportBtn = document.getElementById('exportDataBtn');
+      const importBtn = document.getElementById('importDataBtn');
+      const repairBtn = document.getElementById('repairBtn');
+      const toast = document.getElementById('toast');
+
+      function showToast(message, duration = 3000) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, duration);
+      }
+
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          exportUserData();
+        });
+      }
+
+      if (importBtn) {
+        importBtn.addEventListener('click', () => {
+          importUserData();
+        });
+      }
+
+      if (repairBtn) {
+        repairBtn.addEventListener('click', () => {
+          if (confirm('将清除所有本地数据并刷新页面，确认？')) {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith('keykey_')) {
+                keysToRemove.push(key);
+              }
+            }
+            keysToRemove.forEach(key => { localStorage.removeItem(key); });
+            showToast('数据已清除，正在刷新…');
+            setTimeout(() => { location.reload(); }, 1000);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
