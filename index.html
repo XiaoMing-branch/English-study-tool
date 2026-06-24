@@ -389,6 +389,140 @@
     }
 
     /* ========================================
+       Placeholder Pages
+    ======================================== */
+    .placeholder-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+    }
+
+    .placeholder-card {
+      background: var(--color-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .placeholder-icon {
+      margin-bottom: 20px;
+    }
+
+    .placeholder-icon svg {
+      width: 48px;
+      height: 48px;
+      color: var(--color-text-tertiary);
+    }
+
+    .placeholder-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+
+    .placeholder-subtitle {
+      font-size: 14px;
+      color: var(--color-text-tertiary);
+    }
+
+    /* ========================================
+       Pronunciation Page
+    ======================================== */
+    .pronunciation-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+    }
+
+    .pronunciation-card {
+      background: var(--color-card);
+      border-radius: var(--radius-card);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 440px;
+      width: 100%;
+    }
+
+    .pronunciation-icon-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    [data-theme="dark"] .pronunciation-icon-wrap {
+      background: #333;
+    }
+
+    .pronunciation-icon {
+      width: 32px;
+      height: 32px;
+      color: #1a1a1a;
+    }
+
+    [data-theme="dark"] .pronunciation-icon {
+      color: #e8e8e8;
+    }
+
+    .pronunciation-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 12px;
+    }
+
+    .pronunciation-desc {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      max-width: 340px;
+      margin: 0 auto 28px;
+    }
+
+    .pronunciation-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .pronunciation-btn {
+      padding: 10px 32px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity var(--transition);
+      border: 1.5px solid transparent;
+    }
+
+    .pronunciation-btn:hover {
+      opacity: 0.85;
+    }
+
+    .pronunciation-btn.primary {
+      background: var(--color-accent);
+      color: white;
+      border-color: var(--color-accent);
+    }
+
+    .pronunciation-btn.secondary {
+      background: transparent;
+      color: var(--color-text-primary);
+      border-color: var(--color-border);
+    }
+
+    /* ========================================
        Main Content
     ======================================== */
     .main {
@@ -1404,12 +1538,119 @@
         setSidebarCollapsed(!isCollapsed);
       });
 
-      const navItems = document.querySelectorAll('.nav-item');
-      navItems.forEach(item => {
+      // =====================================
+      // Page Router
+      // =====================================
+      const pageContent = document.querySelector('.main-content');
+      const homePageHTML = pageContent.innerHTML;
+
+      function switchPage(pageName) {
+        // Update active nav state
+        document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); });
+        const targetNav = document.querySelector(`.nav-item[data-page="${pageName}"]`);
+        if (targetNav) targetNav.classList.add('active');
+
+        // Render page content
+        switch (pageName) {
+          case 'home':
+            pageContent.innerHTML = homePageHTML;
+            break;
+          case 'pronunciation':
+            renderPronunciationPage();
+            break;
+          default:
+            renderPlaceholderPage(pageName);
+            break;
+        }
+
+        // Re-bind search events when switching to home
+        if (pageName === 'home') {
+          const searchInput = document.getElementById('searchInput');
+          const searchSubmit = document.getElementById('searchSubmit');
+          const searchHeaderBtn = document.querySelector('.search-header-btn');
+
+          if (searchSubmit) {
+            searchSubmit.addEventListener('click', () => performSearch(searchInput?.value || ''));
+          }
+          if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') performSearch(searchInput.value);
+            });
+          }
+          if (searchHeaderBtn) {
+            searchHeaderBtn.addEventListener('click', () => searchInput?.focus());
+          }
+          // Update search result reference for performSearch/showError/renderOEDResult
+          searchResult = document.getElementById('searchResult');
+        }
+      }
+
+      function renderPronunciationPage() {
+        pageContent.innerHTML = `
+          <div class="pronunciation-page">
+            <div class="pronunciation-card">
+              <div class="pronunciation-icon-wrap">
+                <svg class="pronunciation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 18V5l12-2v13"/>
+                  <circle cx="6" cy="18" r="3"/>
+                  <circle cx="15" cy="16" r="3"/>
+                  <path d="M9 5l12-2"/>
+                </svg>
+              </div>
+              <h2 class="pronunciation-title">发音学习</h2>
+              <p class="pronunciation-desc">登录后即可使用新概念英语在线点读和音标学习功能，支持双语对照、逐句播放、跟读练习和视频讲解</p>
+              <div class="pronunciation-actions">
+                <button type="button" class="pronunciation-btn primary">登录</button>
+                <button type="button" class="pronunciation-btn secondary">注册</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderPlaceholderPage(pageName) {
+        // Map page names to display info
+        const pageInfo = {
+          'word-practice': { icon: getNavIcon('word-practice'), title: '单词练习' },
+          'sentence-practice': { icon: getNavIcon('sentence-practice'), title: '句子练习' },
+          'resources': { icon: getNavIcon('resources'), title: '资源中心' },
+          'review': { icon: getNavIcon('review'), title: '复习中心' },
+          'knowledge': { icon: getNavIcon('knowledge'), title: '知识文章' },
+          'statistics': { icon: getNavIcon('statistics'), title: '学习统计' },
+          'profile': { icon: getNavIcon('profile'), title: '个人中心' },
+          'contribute': { icon: getNavIcon('contribute'), title: '共建计划' }
+        };
+
+        const info = pageInfo[pageName] || { icon: '', title: pageName };
+
+        pageContent.innerHTML = `
+          <div class="placeholder-page">
+            <div class="placeholder-card">
+              <div class="placeholder-icon">${info.icon}</div>
+              <div class="placeholder-title">${info.title}</div>
+              <div class="placeholder-subtitle">该功能即将上线</div>
+            </div>
+          </div>
+        `;
+      }
+
+      function getNavIcon(pageName) {
+        const navItem = document.querySelector(`.nav-item[data-page="${pageName}"]`);
+        if (navItem) {
+          const iconEl = navItem.querySelector('.nav-icon');
+          if (iconEl) return iconEl.innerHTML;
+        }
+        return '';
+      }
+
+      // =====================================
+      // Nav Click Handler — Page Router
+      // =====================================
+      document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.preventDefault();
-          navItems.forEach(n => { n.classList.remove('active'); });
-          item.classList.add('active');
+          const page = item.dataset.page;
+          if (page) switchPage(page);
         });
       });
 
@@ -1443,7 +1684,7 @@
       // =====================================
       const searchInput = document.getElementById('searchInput');
       const searchSubmit = document.getElementById('searchSubmit');
-      const searchResult = document.getElementById('searchResult');
+      let searchResult = document.getElementById('searchResult');
 
       // =====================================
       // User data export / import
